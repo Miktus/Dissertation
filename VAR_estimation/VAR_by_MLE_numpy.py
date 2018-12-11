@@ -1,22 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Estimation of simulated VAR by ML
+# # Estimation of simulated VAR by ML using only  numpy
 
 # ## Libraries
 
-# In[1]:
+# In[84]:
 
 
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-import datetime
-import statsmodels.api as sm
-import random as random
-from statsmodels.tsa.arima_process import arma_generate_sample
-import tsm as tsm
-import pyflux as pf
 from scipy.optimize import minimize
 
 np.random.seed(1)
@@ -24,55 +17,68 @@ np.random.seed(1)
 
 # ## Simulation of stationary time-series
 
-# In[2]:
+# In[27]:
 
 
 # Time-series dimension of simulation
 
 nsample = 120
-
-todays_date = datetime.datetime.now().date()
-index = pd.date_range(end = todays_date, periods=nsample, freq='Q')
-print(index)
+nvar = 3
 
 
-# In[3]:
+# In[28]:
 
 
-# Create null data frame
+# Create null data frames for storing data
 
-columns = ['X','Y', 'Z']
-df = pd.DataFrame(index=index, columns=columns)
-df = df.fillna(0) # With 0s rather than NaNs
-print(df.head())
+df = np.empty((nsample, nvar))
+rho = np.empty((nvar))
 
 
-# In[4]:
+# In[62]:
 
 
-# Simulation of ARMA processes
+# Simulation of processes
 
-for i in np.arange(0,len(df.columns)):
+# Start values
+
+for i in np.arange(0, df.shape[1]):
+    df[0,i] = np.random.random()
     
-    arparams = np.array([1, random.uniform(-0.99,0.99), random.uniform(-0.99,0.99)])
-    maparams = np.array([1, random.uniform(-0.99,0.99), random.uniform(-0.99,0.99)])
-    
-    df.iloc[:,i] = arma_generate_sample(arparams, maparams, nsample)  
+# Rho parameters, smaller than one in absolute value
+for i in np.arange(0, df.shape[1]):
+    rho[i] = np.random.uniform(-0.99, 0.99)
 
-print(df.head())
+# Create the AR(1) processes
+for i in np.arange(1,df.shape[0]):
+    for j in np.arange(0, df.shape[1]):
+        df[i,j] = rho[j]*df[i-1, j] + np.random.normal()
+
+# print(df)
 
 
-# In[5]:
+# In[67]:
 
 
 # Plots
 
-df.plot(subplots=True, figsize=(30,20))
+f, axarr = plt.subplots(3, sharex=True, sharey=True)
+f.suptitle('Basic plots')
+
+for i in np.arange(0, df.shape[1]):
+    axarr[i].plot(df[:,i])
+
+# Bring subplots close to each other.
+f.subplots_adjust(hspace=0)
+
+# Hide x labels and tick labels for all but bottom plot.
+for ax in axarr:
+    ax.label_outer()
 
 
 # ## VAR
 
-# In[6]:
+# In[85]:
 
 
 class VAR:
@@ -80,7 +86,7 @@ class VAR:
     **** VECTOR AUTOREGRESSION (VAR) MODELS ****
     ----------
     Parameters
-    data : pd.DataFrame or np.array
+    data : np.array
         Field to specify the time series data that will be used.
     lags : int
         Field to specify how many lag terms the model will have. 
@@ -100,10 +106,8 @@ class VAR:
         
         # Format the dependant variables
         self.data = data
-        self.values = data.values
-        self.index = data.index     
-        self.data_name = data.columns.values
         self.T = data.shape[0]
+        self.ylen = data.shape[1]
         
         # Format the independent variables
         
@@ -111,18 +115,17 @@ class VAR:
         
         # Difference data
         X = np.transpose(self.data)
-        for order in range(self.integ):
+        for order in np.arange(self.integ):
             X = np.asarray([np.diff(i) for i in X])
             self.data_name = np.asarray(["Differenced " + str(i) for i in self.data_name])
         self.data = X.T
-        self.ylen = self.data_name.shape[0]
         
         """
         Y : np.array
             Contains the length-adjusted time series (accounting for lags)
         """     
 
-        self.Y = self.data.drop(self.data.index[np.arange(0, self.lags)]).T
+        self.Y = (self.data[self.lags:,]).T
         
     def _design(self):
         """ Creates a design matrix
@@ -132,9 +135,9 @@ class VAR:
         Z = np.ones(((self.ylen*self.lags+1), (self.T-self.lags)))
 
         row_count=1
-        for lag in range(1, self.lags+1):
-            for reg in range(self.ylen):
-                Z[row_count, :] = self.data.ix[:,reg][(self.lags-lag):-lag]
+        for lag in np.arange(1, self.lags+1):
+            for reg in np.arange(self.ylen):
+                Z[row_count, :] = self.data[:,reg][(self.lags-lag):-lag]
                 row_count += 1
                 
         return(Z)
@@ -188,7 +191,7 @@ class VAR:
         return(results.x)
 
 
-# In[7]:
+# In[83]:
 
 
 # Estimate VAR(1) by OLS
@@ -196,34 +199,26 @@ class VAR:
 # In general
 
 OLS_results = VAR(data = df, lags = 1, target = None, integ = 0).OLS()
+OLS_results
 
 # For more clarity
 
 par_names_OLS = ['X Constant','X AR(1)','Y to X AR(1)','Z to X AR(1)','Y Constant','Y AR(1)','X to Y AR(1)','Z to Y AR(1)','Z Constant','Z AR(1)','X to Z AR(1)','Y to Z AR(1)'] 
-results_OLS = pd.DataFrame(index = par_names_OLS, data = OLS_results.reshape(-1))
-results_OLS.columns = ['Parameters']
+results_OLS =  dict(zip(par_names_OLS, OLS_results.flatten()))
 results_OLS
 
 
-# In[8]:
-
-
-# Check with the values for VAR(1) from the pyflux package
-
-pf.VAR(df,1).fit().summary()
-
-
-# In[9]:
+# In[88]:
 
 
 # Estimate VAR(1) by MLE
 
 MLE_results = VAR(data = df, lags = 1, target = None, integ = 0).MLE()
+MLE_results
 
 # For more clarity
 
 par_names_MLE = par_names_OLS + ['Std of X error','Std of Y error', 'Std of Z error']
-results_MLE = pd.DataFrame(index = par_names_MLE, data = MLE_results)
-results_MLE.columns = ['Parameters']
+results_MLE = dict(zip(par_names_MLE, MLE_results.flatten()))
 results_MLE
 
