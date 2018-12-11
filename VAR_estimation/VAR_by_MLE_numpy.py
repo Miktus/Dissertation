@@ -5,7 +5,7 @@
 
 # ## Libraries
 
-# In[84]:
+# In[1]:
 
 
 import numpy as np
@@ -17,16 +17,16 @@ np.random.seed(1)
 
 # ## Simulation of stationary time-series
 
-# In[27]:
+# In[35]:
 
 
 # Time-series dimension of simulation
 
-nsample = 120
+nsample = 1000000
 nvar = 3
 
 
-# In[28]:
+# In[3]:
 
 
 # Create null data frames for storing data
@@ -35,7 +35,7 @@ df = np.empty((nsample, nvar))
 rho = np.empty((nvar))
 
 
-# In[62]:
+# In[4]:
 
 
 # Simulation of processes
@@ -57,7 +57,7 @@ for i in np.arange(1,df.shape[0]):
 # print(df)
 
 
-# In[67]:
+# In[5]:
 
 
 # Plots
@@ -78,7 +78,7 @@ for ax in axarr:
 
 # ## VAR
 
-# In[85]:
+# In[30]:
 
 
 class VAR:
@@ -164,8 +164,8 @@ class VAR:
         coef_var = np.diag(par[-self.ylen:])
         
         logLik = -self.Y.shape[1]*self.ylen*np.log(2*np.pi)*.5 
-        - self.Y.shape[1]*np.log(np.abs(np.linalg.det(coef_var)))*.5 
-        + .5*np.trace(np.dot(np.dot((self.Y - np.dot(coef,Z)).T,np.linalg.inv(coef_var)),self.Y - np.dot(coef,Z)))
+        + .5*self.Y.shape[1]*np.log(np.abs(np.linalg.det(coef_var)))
+        - .5*np.dot(np.dot((self.Y - np.dot(coef,Z)).T,np.linalg.inv(coef_var)),self.Y - np.dot(coef,Z))
         
         return logLik
     
@@ -182,7 +182,7 @@ class VAR:
         """     
 
         # Make a list of initial parameter guesses (b0, b1, sd)   
-        initParams = np.random.uniform(-10,10, (self.ylen+1)*self.ylen + self.ylen)
+        initParams = np.random.uniform(-1,1, (self.ylen+1)*self.ylen + self.ylen)
 
         # Run the minimizer
         results = minimize(self._neg_loglike, initParams, method='BFGS')
@@ -191,7 +191,7 @@ class VAR:
         return(results.x)
 
 
-# In[83]:
+# In[36]:
 
 
 # Estimate VAR(1) by OLS
@@ -208,7 +208,7 @@ results_OLS =  dict(zip(par_names_OLS, OLS_results.flatten()))
 results_OLS
 
 
-# In[88]:
+# In[38]:
 
 
 # Estimate VAR(1) by MLE
