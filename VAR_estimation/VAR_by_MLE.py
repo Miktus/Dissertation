@@ -29,7 +29,7 @@ np.random.seed(1)
 
 # Time-series dimension of simulation
 
-nsample = 1000
+nsample = 100
 
 todays_date = datetime.datetime.now().date()
 index = pd.date_range(end = todays_date, periods=nsample, freq='Q')
@@ -160,17 +160,18 @@ class VAR:
         
         coef = np.reshape(par[0:self.ylen**2], (self.ylen, self.ylen))
         coef_mean = par[self.ylen**2:self.ylen**2+self.ylen]
-        coef_var = np.zeros((self.ylen, self.ylen))
+        coef_var = np.diag(par[self.ylen**2+self.ylen:])    
         
-        coef_var[0,0] = par[self.ylen**2+self.ylen]
-        coef_var[0,1] = par[self.ylen**2+self.ylen+1]
-        coef_var[0,2] = par[self.ylen**2+self.ylen+2]
-        coef_var[1,0] =coef_var[0,1]
-        coef_var[1,1] = par[self.ylen**2+self.ylen+3]
-        coef_var[1,2] = par[self.ylen**2+self.ylen+4]
-        coef_var[2,0] = coef_var[0,2]
-        coef_var[2,1] = coef_var[2,1]
-        coef_var[2,2] = par[self.ylen**2+self.ylen+5]
+#         General form of variance-covariance matrix
+#         coef_var[0,0] = par[self.ylen**2+self.ylen]
+#         coef_var[0,1] = par[self.ylen**2+self.ylen+1]
+#         coef_var[0,2] = par[self.ylen**2+self.ylen+2]
+#         coef_var[1,0] =coef_var[0,1]
+#         coef_var[1,1] = par[self.ylen**2+self.ylen+3]
+#         coef_var[1,2] = par[self.ylen**2+self.ylen+4]
+#         coef_var[2,0] = coef_var[0,2]
+#         coef_var[2,1] = coef_var[2,1]
+#         coef_var[2,2] = par[self.ylen**2+self.ylen+5]
 
         Y_0 = (self.Y.T - coef_mean).T
         Z_0 = (Z.T - coef_mean).T 
@@ -180,6 +181,21 @@ class VAR:
         - .5*np.trace(np.dot(np.dot((Y_0 - np.dot(coef,Z_0)).T,np.linalg.inv(coef_var)),Y_0 - np.dot(coef,Z_0)))
         
         return -logLik
+
+    def _con_1(self, x):
+            x[-3]
+    def _con_2(self, x):
+            x[-2]
+    def _con_3(self, x):
+            x[-1]
+    
+#         General form of variance-covariance matrix
+#     def _con_1(self, x):
+#         x[self.ylen**2+self.ylen]
+#     def _con_2(self, x):
+#         x[self.ylen**2+self.ylen+3]
+#     def _con_3(self, x):
+#         x[self.ylen**2+self.ylen+5]
     
     def MLE(self):
         """ Creates MLE coefficient matrix
@@ -192,12 +208,20 @@ class VAR:
         ----------
         It is based on the assumption of normality of errors
         """     
+        
+        cons = [{'type':'ineq', 'fun': self._con_1},
+                {'type':'ineq', 'fun': self._con_2},
+               {'type':'ineq', 'fun': self._con_3}]
 
-        # Make a list of initial parameter guesses (b0, b1, sd)   
-        initParams = np.random.uniform(-1,1, (self.ylen)**2 + self.ylen + int((self.ylen*(self.ylen+1))/2) )
+        # Make a list of initial parameter guesses 
+        
+#         General form of variance-covariance matrix
+#         initParams = np.random.uniform(-1,1, (self.ylen)**2 + self.ylen + int((self.ylen*(self.ylen+1))/2) )
+
+        initParams = np.concatenate((np.random.uniform(-1,1, (self.ylen)**2 + self.ylen), np.random.uniform(0,1, self.ylen)))
 
         # Run the minimizer
-        results = minimize(self._neg_loglike, initParams, method='BFGS')
+        results = minimize(self._neg_loglike, initParams, constraints = cons, method='COBYLA')
 
         # Print the results
         return(results.x)
@@ -228,23 +252,28 @@ results_OLS
 pf.VAR(df,1).fit().summary()
 
 
-# In[11]:
+# In[9]:
 
 
 # Estimate VAR(1) by MLE
 
 MLE_results = VAR(data = df, lags = 1, target = None, integ = 0).MLE()
+MLE_results
 
 # For more clarity
 
-par_names_MLE =  ['X AR(1)','Y to X AR(1)','Z to X AR(1)','Y AR(1)','X to Y AR(1)','Z to Y AR(1)','Z AR(1)','X to Z AR(1)','Y to Z AR(1)', 
-                  'X Constant','Y Constant', 'Z Constant', 'Var(X)', 'Cov(X,Y)', 'Cov(X,Z)', 'Var(Y)', 'Cov(Y,Z)', 'Var(Z)']
-results_MLE = pd.DataFrame(index = par_names_MLE, data = MLE_results)
-results_MLE.columns = ['Parameters']
+# par_names_MLE = par_names_MLE =  ['X AR(1)','Y to X AR(1)','Z to X AR(1)','Y AR(1)','X to Y AR(1)','Z to Y AR(1)','Z AR(1)','X to Z AR(1)','Y to Z AR(1)', 
+#                   'X Constant','Y Constant', 'Z Constant', 'Var(X)', 'Cov(X,Y)', 'Cov(X,Z)', 'Var(Y)', 'Cov(Y,Z)', 'Var(Z)']
+# results_MLE = dict(zip(par_names_MLE, MLE_results.flatten()))
+# results_MLE
+
+par_names_MLE = par_names_MLE =  ['X AR(1)','Y to X AR(1)','Z to X AR(1)','Y AR(1)','X to Y AR(1)','Z to Y AR(1)','Z AR(1)','X to Z AR(1)','Y to Z AR(1)', 
+                  'X Constant','Y Constant', 'Z Constant', 'Var(X)', 'Var(Y)', 'Var(Z)']
+results_MLE = dict(zip(par_names_MLE, MLE_results.flatten()))
 results_MLE
 
 
-# In[12]:
+# In[10]:
 
 
 # Check with the values for VAR(1) from the pyflux package
