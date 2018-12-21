@@ -41,7 +41,7 @@ print(index)
 
 # Create null data frame
 
-columns = ['X','Y', 'Z']
+columns = ['A','B','C','D']
 df = pd.DataFrame(index=index, columns=columns)
 df = df.fillna(0) # With 0s rather than NaNs
 print(df.head())
@@ -161,42 +161,14 @@ class VAR:
         coef = np.reshape(par[0:self.ylen**2], (self.ylen, self.ylen))
         coef_mean = par[self.ylen**2:self.ylen**2+self.ylen]
         coef_var = np.diag(par[self.ylen**2+self.ylen:])    
-        
-#         General form of variance-covariance matrix
-#         coef_var[0,0] = par[self.ylen**2+self.ylen]
-#         coef_var[0,1] = par[self.ylen**2+self.ylen+1]
-#         coef_var[0,2] = par[self.ylen**2+self.ylen+2]
-#         coef_var[1,0] =coef_var[0,1]
-#         coef_var[1,1] = par[self.ylen**2+self.ylen+3]
-#         coef_var[1,2] = par[self.ylen**2+self.ylen+4]
-#         coef_var[2,0] = coef_var[0,2]
-#         coef_var[2,1] = coef_var[2,1]
-#         coef_var[2,2] = par[self.ylen**2+self.ylen+5]
-
+    
         Y_0 = (self.Y.T - coef_mean).T
         Z_0 = (Z.T - coef_mean).T 
         
-        logLik = -self.Y.shape[1]*self.ylen*np.log(2*np.pi)*.5 
-        - .5*self.Y.shape[1]*np.log(np.abs(np.linalg.det(coef_var)))
-        - .5*np.trace(np.dot(np.dot((Y_0 - np.dot(coef,Z_0)).T,np.linalg.inv(coef_var)),Y_0 - np.dot(coef,Z_0)))
+        logLik = -self.Y.shape[1]*self.ylen*np.log(2*np.pi)*.5 - .5*self.Y.shape[1]*np.log(np.abs(np.linalg.det(coef_var)))- .5*np.trace(np.dot(np.dot((Y_0 - np.dot(coef,Z_0)).T,np.linalg.inv(coef_var)),Y_0 - np.dot(coef,Z_0)))
         
         return -logLik
 
-    def _con_1(self, x):
-            x[-3]
-    def _con_2(self, x):
-            x[-2]
-    def _con_3(self, x):
-            x[-1]
-    
-#         General form of variance-covariance matrix
-#     def _con_1(self, x):
-#         x[self.ylen**2+self.ylen]
-#     def _con_2(self, x):
-#         x[self.ylen**2+self.ylen+3]
-#     def _con_3(self, x):
-#         x[self.ylen**2+self.ylen+5]
-    
     def MLE(self):
         """ Creates MLE coefficient matrix
         ----------
@@ -209,16 +181,14 @@ class VAR:
         It is based on the assumption of normality of errors
         """     
         
-        cons = [{'type':'ineq', 'fun': self._con_1},
-                {'type':'ineq', 'fun': self._con_2},
-               {'type':'ineq', 'fun': self._con_3}]
-
+        cons = []
+        
+        for i in np.arange(self.ylen):
+            cons.append(dict({'type':'ineq', 'fun': eval("lambda x: x[-" + str(i) + "]")}))
+        
         # Make a list of initial parameter guesses 
         
-#         General form of variance-covariance matrix
-#         initParams = np.random.uniform(-1,1, (self.ylen)**2 + self.ylen + int((self.ylen*(self.ylen+1))/2) )
-
-        initParams = np.concatenate((np.random.uniform(-1,1, (self.ylen)**2 + self.ylen), np.random.uniform(0,1, self.ylen)))
+        initParams = np.repeat(1, (self.ylen)**2 + self.ylen + self.ylen)
 
         # Run the minimizer
         results = minimize(self._neg_loglike, initParams, constraints = cons, method='COBYLA')
@@ -238,7 +208,12 @@ OLS_results = VAR(data = df, lags = 1, target = None, integ = 0).OLS()
 
 # For more clarity
 
-par_names_OLS = ['X Constant','X AR(1)','Y to X AR(1)','Z to X AR(1)','Y Constant','Y AR(1)','X to Y AR(1)','Z to Y AR(1)','Z Constant','Z AR(1)','X to Z AR(1)','Y to Z AR(1)'] 
+par_names_OLS = ['A Constant','A AR(1)','B to A AR(1)','C to A AR(1)','D to A AR(1)',
+                 'B Constant','B AR(1)','A to B AR(1)','C to B AR(1)','D to B AR(1)',
+                 'C Constant','C AR(1)','A to C AR(1)','B to C AR(1)', 'D to C AR(1)',
+                 'D Constant','D AR(1)','A to D AR(1)','B to D AR(1)', 'C to D AR(1)'] 
+
+results_OLS = pd.DataFrame(index = par_names_OLS, data = OLS_results.reshape(-1)) 
 results_OLS = pd.DataFrame(index = par_names_OLS, data = OLS_results.reshape(-1))
 results_OLS.columns = ['Parameters']
 results_OLS
@@ -262,13 +237,13 @@ MLE_results
 
 # For more clarity
 
-# par_names_MLE = par_names_MLE =  ['X AR(1)','Y to X AR(1)','Z to X AR(1)','Y AR(1)','X to Y AR(1)','Z to Y AR(1)','Z AR(1)','X to Z AR(1)','Y to Z AR(1)', 
-#                   'X Constant','Y Constant', 'Z Constant', 'Var(X)', 'Cov(X,Y)', 'Cov(X,Z)', 'Var(Y)', 'Cov(Y,Z)', 'Var(Z)']
-# results_MLE = dict(zip(par_names_MLE, MLE_results.flatten()))
-# results_MLE
+par_names_MLE = ['A AR(1)','B to A AR(1)','C to A AR(1)','D to A AR(1)',
+                 'B AR(1)','A to B AR(1)','C to B AR(1)','D to B AR(1)',
+                 'C AR(1)','A to C AR(1)','B to C AR(1)', 'D to C AR(1)',
+                 'D AR(1)','A to D AR(1)','B to D AR(1)', 'C to D AR(1)',
+                 'A Constant','B Constant', 'C Constant', 'D Constant',
+                 'Var(A)','Var(B)','Var(C)','Var(D)'] 
 
-par_names_MLE = par_names_MLE =  ['X AR(1)','Y to X AR(1)','Z to X AR(1)','Y AR(1)','X to Y AR(1)','Z to Y AR(1)','Z AR(1)','X to Z AR(1)','Y to Z AR(1)', 
-                  'X Constant','Y Constant', 'Z Constant', 'Var(X)', 'Var(Y)', 'Var(Z)']
 results_MLE = dict(zip(par_names_MLE, MLE_results.flatten()))
 results_MLE
 
