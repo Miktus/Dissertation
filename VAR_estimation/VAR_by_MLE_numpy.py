@@ -78,7 +78,7 @@ for ax in axarr:
 
 # ## VAR
 
-# In[6]:
+# In[1]:
 
 
 class VAR:
