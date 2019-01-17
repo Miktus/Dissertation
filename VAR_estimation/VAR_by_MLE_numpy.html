@@ -13269,7 +13269,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">VAR</span><span class="p">:</span>
@@ -13297,19 +13297,15 @@ div#notebook {
         
         <span class="c1"># Format the dependant variables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ylen</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        
-        <span class="c1"># Format the independent variables</span>
-        
-        <span class="c1">## TO DO</span>
         
         <span class="c1"># Difference data</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">order</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">integ</span><span class="p">):</span>
             <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">X</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_name</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="s2">&quot;Differenced &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_name</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ylen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Y : np.array</span>
@@ -13352,12 +13348,12 @@ div#notebook {
         
         <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_design</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
         
-        <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="p">))</span>
-        <span class="n">coef_mean</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="o">**</span><span class="mi">2</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="p">]</span>
-        <span class="n">coef_var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="p">:])</span>    
+        <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">lags</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">lags</span><span class="p">))</span>
+        <span class="n">coef_mean</span> <span class="o">=</span> <span class="n">par</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lags</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="o">**</span><span class="mi">2</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">lags</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="p">]</span>
+        <span class="n">coef_var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">lags</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="p">:])</span>    
     
         <span class="n">Y_0</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span> <span class="n">coef_mean</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-        <span class="n">Z_0</span> <span class="o">=</span> <span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span> <span class="n">coef_mean</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> 
+        <span class="n">Z_0</span> <span class="o">=</span> <span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="n">T</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">coef_mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lags</span><span class="p">))</span><span class="o">.</span><span class="n">T</span> 
         
         <span class="n">logLik</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*.</span><span class="mi">5</span> <span class="o">-</span> <span class="o">.</span><span class="mi">5</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">coef_var</span><span class="p">)))</span><span class="o">-</span> <span class="o">.</span><span class="mi">5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">((</span><span class="n">Y_0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coef</span><span class="p">,</span><span class="n">Z_0</span><span class="p">))</span><span class="o">.</span><span class="n">T</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">coef_var</span><span class="p">)),</span><span class="n">Y_0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">coef</span><span class="p">,</span><span class="n">Z_0</span><span class="p">)))</span>
         
@@ -13382,7 +13378,7 @@ div#notebook {
         
         <span class="c1"># Make a list of initial parameter guesses </span>
         
-        <span class="n">initParams</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylen</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="p">)</span>
+        <span class="n">initParams</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lags</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylen</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylen</span><span class="p">)</span>
 
         <span class="c1"># Run the minimizer</span>
         <span class="n">results</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_neg_loglike</span><span class="p">,</span> <span class="n">initParams</span><span class="p">,</span> <span class="n">constraints</span> <span class="o">=</span> <span class="n">cons</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;COBYLA&#39;</span><span class="p">)</span>
@@ -13401,14 +13397,54 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Estimate VAR(1) by OLS</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Estimate VAR(p) by OLS</span>
 
-<span class="c1"># In general</span>
+<span class="n">OLS_results</span> <span class="o">=</span> <span class="n">VAR</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span> <span class="n">lags</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">integ</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">OLS</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">OLS_results</span><span class="p">)</span>
+</pre></div>
 
-<span class="n">OLS_results</span> <span class="o">=</span> <span class="n">VAR</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span> <span class="n">lags</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">integ</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">OLS</span><span class="p">()</span>
-<span class="n">OLS_results</span>
+    </div>
+</div>
+</div>
 
-<span class="c1"># For more clarity</span>
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[[-1.43010004e-03 -1.23405338e+00 -3.52801234e-02  5.28461106e-02
+   3.55658811e-02 -4.37830305e-01 -4.46941038e-02  5.90009337e-02
+  -6.69992693e-03]
+ [ 1.27410912e-03  4.71362952e-02 -1.34617334e+00 -2.59499211e-02
+  -6.22976294e-02  4.47379308e-02 -4.84890382e-01 -4.30348971e-02
+  -4.04686833e-02]
+ [-2.48970121e-03  1.71582734e-02  5.56072774e-02 -1.16512521e+00
+  -3.65132985e-02  2.22215129e-02  5.28047126e-02 -4.17136420e-01
+  -1.00350457e-02]
+ [ 2.84049431e-03 -3.98498242e-02  4.43628119e-03 -3.65490439e-02
+  -8.29880747e-01 -5.16520078e-03  1.48003277e-02 -3.71678054e-02
+  -3.77933158e-01]]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># For more clarity, let&#39;s consider the specific case of VAR(1)</span>
+
+<span class="n">OLS_results</span> <span class="o">=</span> <span class="n">VAR</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span> <span class="n">lags</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">integ</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">OLS</span><span class="p">()</span>
 
 <span class="n">par_names_OLS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;A Constant&#39;</span><span class="p">,</span><span class="s1">&#39;A AR(1)&#39;</span><span class="p">,</span><span class="s1">&#39;B to A AR(1)&#39;</span><span class="p">,</span><span class="s1">&#39;C to A AR(1)&#39;</span><span class="p">,</span><span class="s1">&#39;D to A AR(1)&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;B Constant&#39;</span><span class="p">,</span><span class="s1">&#39;B AR(1)&#39;</span><span class="p">,</span><span class="s1">&#39;A to B AR(1)&#39;</span><span class="p">,</span><span class="s1">&#39;C to B AR(1)&#39;</span><span class="p">,</span><span class="s1">&#39;D to B AR(1)&#39;</span><span class="p">,</span>
@@ -13429,32 +13465,32 @@ div#notebook {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[7]:</div>
+    <div class="prompt output_prompt">Out[8]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;A Constant&#39;: 0.01010538635621291,
- &#39;A AR(1)&#39;: -0.7055232088859222,
- &#39;B to A AR(1)&#39;: 0.008819560796300707,
- &#39;C to A AR(1)&#39;: 0.02070126311884091,
- &#39;D to A AR(1)&#39;: 0.02709696876572987,
- &#39;B Constant&#39;: -0.04413308761845076,
- &#39;B AR(1)&#39;: 0.02611211280166218,
- &#39;A to B AR(1)&#39;: -0.8138454542977532,
- &#39;C to B AR(1)&#39;: -0.006427980734328676,
- &#39;D to B AR(1)&#39;: -0.04704891837392927,
- &#39;C Constant&#39;: 0.01926967806551043,
- &#39;C AR(1)&#39;: -0.0006427545452451516,
- &#39;A to C AR(1)&#39;: 0.009698421242716023,
- &#39;B to C AR(1)&#39;: -0.635662678872401,
- &#39;D to C AR(1)&#39;: -0.0387518766048352,
- &#39;D Constant&#39;: 0.062350840682147635,
- &#39;D AR(1)&#39;: -0.059201152076564664,
- &#39;A to D AR(1)&#39;: -0.009013081435577584,
- &#39;B to D AR(1)&#39;: -0.01163950876654401,
- &#39;C to D AR(1)&#39;: -0.22523373893589382}</pre>
+<pre>{&#39;A Constant&#39;: -0.001861964780497992,
+ &#39;A AR(1)&#39;: -0.8607272366027295,
+ &#39;B to A AR(1)&#39;: 0.001098602736441077,
+ &#39;C to A AR(1)&#39;: 0.007867323061678316,
+ &#39;D to A AR(1)&#39;: 0.06285261179400027,
+ &#39;B Constant&#39;: 0.0014183930260175085,
+ &#39;B AR(1)&#39;: 0.011087348439175283,
+ &#39;A to B AR(1)&#39;: -0.9054261548548014,
+ &#39;C to B AR(1)&#39;: 0.0038236722617924195,
+ &#39;D to B AR(1)&#39;: -0.043818021715871076,
+ &#39;C Constant&#39;: -0.0011278673649698777,
+ &#39;C AR(1)&#39;: -0.004892827552233873,
+ &#39;A to C AR(1)&#39;: 0.006731282733426945,
+ &#39;B to C AR(1)&#39;: -0.8209725172167034,
+ &#39;D to C AR(1)&#39;: -0.038836836756503325,
+ &#39;D Constant&#39;: 0.0011069732762874652,
+ &#39;D AR(1)&#39;: -0.036961561453318546,
+ &#39;A to D AR(1)&#39;: -0.0041494290047110905,
+ &#39;B to D AR(1)&#39;: 0.0028471200108427437,
+ &#39;C to D AR(1)&#39;: -0.6002864544847416}</pre>
 </div>
 
 </div>
@@ -13465,13 +13501,55 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Estimate VAR(1) by MLE</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Estimate VAR(p) by MLE</span>
 
-<span class="n">MLE_results</span> <span class="o">=</span> <span class="n">VAR</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span> <span class="n">lags</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">integ</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">MLE</span><span class="p">()</span>
-<span class="n">MLE_results</span>
+<span class="n">MLE_results</span> <span class="o">=</span> <span class="n">VAR</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span> <span class="n">lags</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">integ</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">MLE</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">MLE_results</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[-1.99493200e-17  1.07439716e-01  1.10369942e-01  2.88008889e-03
+  6.63700743e-01  6.75525219e-02  1.24007372e-01 -1.31540314e-01
+  8.45478309e-02 -1.31821806e+00 -2.35198701e-02 -4.06341214e-02
+  9.69164499e-02 -4.68485086e-01 -6.61164985e-03 -5.09891367e-03
+  4.10771061e-03  3.81060510e-02 -1.16701505e+00 -4.82815136e-03
+  2.23754041e-02  3.10066845e-02 -4.23267292e-01  9.77133720e-03
+ -6.56668987e-02  4.82112943e-02 -4.11373924e-02 -8.12032234e-01
+ -5.86043035e-02  6.50068626e-02 -5.48421046e-02 -3.40621261e-01
+ -1.62012646e-01  3.41484353e-03 -1.71938624e-02  3.29855431e-03
+  4.22202583e+00  2.48341700e+00  2.08997694e+00  2.77428241e+00]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># For more clarity, let&#39;s consider the specific case of VAR(1)</span>
+
+<span class="n">MLE_results</span> <span class="o">=</span> <span class="n">VAR</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span> <span class="n">lags</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">integ</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">MLE</span><span class="p">()</span>
 
 <span class="n">par_names_MLE</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;A AR(1)&#39;</span><span class="p">,</span><span class="s1">&#39;B to A AR(1)&#39;</span><span class="p">,</span><span class="s1">&#39;C to A AR(1)&#39;</span><span class="p">,</span><span class="s1">&#39;D to A AR(1)&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;B AR(1)&#39;</span><span class="p">,</span><span class="s1">&#39;A to B AR(1)&#39;</span><span class="p">,</span><span class="s1">&#39;C to B AR(1)&#39;</span><span class="p">,</span><span class="s1">&#39;D to B AR(1)&#39;</span><span class="p">,</span>
@@ -13494,36 +13572,36 @@ div#notebook {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[8]:</div>
+    <div class="prompt output_prompt">Out[10]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;A AR(1)&#39;: -2.306038150315576e-19,
- &#39;B to A AR(1)&#39;: 0.07285971195939525,
- &#39;C to A AR(1)&#39;: 0.01939584274170388,
- &#39;D to A AR(1)&#39;: -0.06803269931117267,
- &#39;B AR(1)&#39;: 0.02590013418894838,
- &#39;A to B AR(1)&#39;: -0.8135157704148301,
- &#39;C to B AR(1)&#39;: -0.006609828276350366,
- &#39;D to B AR(1)&#39;: -0.04710269742026835,
- &#39;C AR(1)&#39;: -0.0009164158351410184,
- &#39;A to C AR(1)&#39;: 0.009756276191233293,
- &#39;B to C AR(1)&#39;: -0.6355429623634855,
- &#39;D to C AR(1)&#39;: -0.038759511124099255,
- &#39;D AR(1)&#39;: -0.058965473781018074,
- &#39;A to D AR(1)&#39;: -0.008841260720395828,
- &#39;B to D AR(1)&#39;: -0.01123750636862695,
- &#39;C to D AR(1)&#39;: -0.2254193777719886,
- &#39;A Constant&#39;: 0.006134127008689373,
- &#39;B Constant&#39;: -0.025346900186250212,
- &#39;C Constant&#39;: 0.010416346168505154,
- &#39;D Constant&#39;: 0.05151656375672152,
- &#39;Var(A)&#39;: 2.0399138008925686,
- &#39;Var(B)&#39;: 0.9899443520546938,
- &#39;Var(C)&#39;: 0.9868341245697729,
- &#39;Var(D)&#39;: 0.9599688430626565}</pre>
+<pre>{&#39;A AR(1)&#39;: 6.925954179199075e-06,
+ &#39;B to A AR(1)&#39;: 0.08894081711893524,
+ &#39;C to A AR(1)&#39;: 0.017779128160760327,
+ &#39;D to A AR(1)&#39;: -0.10898659980900928,
+ &#39;B AR(1)&#39;: 0.015898193097382916,
+ &#39;A to B AR(1)&#39;: -0.91431751850846,
+ &#39;C to B AR(1)&#39;: 0.0029239334433635526,
+ &#39;D to B AR(1)&#39;: -0.036247447449927875,
+ &#39;C AR(1)&#39;: 0.0018848612805951333,
+ &#39;A to C AR(1)&#39;: 0.00826269662726691,
+ &#39;B to C AR(1)&#39;: -0.823837176626754,
+ &#39;D to C AR(1)&#39;: -0.03956228891466122,
+ &#39;D AR(1)&#39;: -0.03809786785593415,
+ &#39;A to D AR(1)&#39;: -0.014398083108418147,
+ &#39;B to D AR(1)&#39;: 0.0026236512583917627,
+ &#39;C to D AR(1)&#39;: -0.5954837063427136,
+ &#39;A Constant&#39;: -0.0028400077811004086,
+ &#39;B Constant&#39;: -0.001980963430429214,
+ &#39;C Constant&#39;: 0.024229369365628948,
+ &#39;D Constant&#39;: 0.0077459358571964326,
+ &#39;Var(A)&#39;: 5.38197010500083,
+ &#39;Var(B)&#39;: 2.346375446347013,
+ &#39;Var(C)&#39;: 2.382921162910004,
+ &#39;Var(D)&#39;: 1.619412368996325}</pre>
 </div>
 
 </div>

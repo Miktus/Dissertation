@@ -78,7 +78,7 @@ for ax in axarr:
 
 # ## VAR
 
-# In[1]:
+# In[6]:
 
 
 class VAR:
@@ -106,19 +106,15 @@ class VAR:
         
         # Format the dependant variables
         self.data = data
-        self.T = data.shape[0]
-        self.ylen = data.shape[1]
-        
-        # Format the independent variables
-        
-        ## TO DO
         
         # Difference data
         X = np.transpose(self.data)
         for order in np.arange(self.integ):
             X = np.asarray([np.diff(i) for i in X])
-            self.data_name = np.asarray(["Differenced " + str(i) for i in self.data_name])
         self.data = X.T
+        
+        self.T = self.data.shape[0]
+        self.ylen = self.data.shape[1]
         
         """
         Y : np.array
@@ -161,12 +157,12 @@ class VAR:
         
         Z = self._design()[1:]
         
-        coef = np.reshape(par[0:self.ylen**2], (self.ylen, self.ylen))
-        coef_mean = par[self.ylen**2:self.ylen**2+self.ylen]
-        coef_var = np.diag(par[self.ylen**2+self.ylen:])    
+        coef = np.reshape(par[0:self.lags*self.ylen**2], (self.ylen, self.ylen*self.lags))
+        coef_mean = par[self.lags*self.ylen**2:self.lags*self.ylen**2+self.ylen]
+        coef_var = np.diag(par[self.lags*self.ylen**2+self.ylen:])    
     
         Y_0 = (self.Y.T - coef_mean).T
-        Z_0 = (Z.T - coef_mean).T 
+        Z_0 = (Z.T - np.tile(coef_mean, self.lags)).T 
         
         logLik = -self.Y.shape[1]*self.ylen*np.log(2*np.pi)*.5 - .5*self.Y.shape[1]*np.log(np.abs(np.linalg.det(coef_var)))- .5*np.trace(np.dot(np.dot((Y_0 - np.dot(coef,Z_0)).T,np.linalg.inv(coef_var)),Y_0 - np.dot(coef,Z_0)))
         
@@ -191,7 +187,7 @@ class VAR:
         
         # Make a list of initial parameter guesses 
         
-        initParams = np.repeat(1, (self.ylen)**2 + self.ylen + self.ylen)
+        initParams = np.repeat(1, self.lags*(self.ylen**2) + self.ylen + self.ylen)
 
         # Run the minimizer
         results = minimize(self._neg_loglike, initParams, constraints = cons, method='COBYLA')
@@ -203,14 +199,18 @@ class VAR:
 # In[7]:
 
 
-# Estimate VAR(1) by OLS
+# Estimate VAR(p) by OLS
 
-# In general
+OLS_results = VAR(data = df, lags = 2, target = None, integ = 1).OLS()
+print(OLS_results)
 
-OLS_results = VAR(data = df, lags = 1, target = None, integ = 0).OLS()
-OLS_results
 
-# For more clarity
+# In[8]:
+
+
+# For more clarity, let's consider the specific case of VAR(1)
+
+OLS_results = VAR(data = df, lags = 1, target = None, integ = 1).OLS()
 
 par_names_OLS = ['A Constant','A AR(1)','B to A AR(1)','C to A AR(1)','D to A AR(1)',
                  'B Constant','B AR(1)','A to B AR(1)','C to B AR(1)','D to B AR(1)',
@@ -221,13 +221,21 @@ results_OLS =  dict(zip(par_names_OLS, OLS_results.flatten()))
 results_OLS
 
 
-# In[8]:
+# In[9]:
 
 
-# Estimate VAR(1) by MLE
+# Estimate VAR(p) by MLE
 
-MLE_results = VAR(data = df, lags = 1, target = None, integ = 0).MLE()
-MLE_results
+MLE_results = VAR(data = df, lags = 2, target = None, integ = 1).MLE()
+print(MLE_results)
+
+
+# In[10]:
+
+
+# For more clarity, let's consider the specific case of VAR(1)
+
+MLE_results = VAR(data = df, lags = 1, target = None, integ = 1).MLE()
 
 par_names_MLE = ['A AR(1)','B to A AR(1)','C to A AR(1)','D to A AR(1)',
                  'B AR(1)','A to B AR(1)','C to B AR(1)','D to B AR(1)',
