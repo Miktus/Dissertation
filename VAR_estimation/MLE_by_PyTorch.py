@@ -5,11 +5,12 @@
 
 # ## Libraries
 
-# In[10]:
+# In[1]:
 
 
 import matplotlib.pyplot as plt
 import torch
+from torch.autograd import Variable
 import math
 
 
@@ -76,7 +77,7 @@ for ax in axarr:
 
 # ## VAR
 
-# In[156]:
+# In[6]:
 
 
 class VAR:
@@ -104,20 +105,26 @@ class VAR:
         
         # Format the dependant variables
         self.data = data
-        self.T = data.shape[0]
-        self.ylen = data.shape[1]
         
         # Format the independent variables
         
-        ## TO DO
+        def diff(x, n):  
+            """ Calculate the n-th order discrete difference
+            """
+            new_torch = torch.zeros(list(x.shape)[0]-n)
+            if n == 0:
+                new_torch = x
+            else: 
+                for i in range(list(x.shape)[0]-n):
+                    new_torch[i] = x[i] - x[i+n]
+            return new_torch
+
+        # Difference data
         
-#         # Difference data
-#         X = np.transpose(self.data)
-#         for order in range(self.integ):
-#             X = np.asarray([np.diff(i) for i in X])
-#             self.data_name = np.asarray(["Differenced " + str(i) for i in self.data_name])
-#         self.data = X.T
-        
+        self.data = torch.t(torch.stack([diff(i, self.integ) for i in torch.t(self.data)]))
+        self.T = self.data.shape[0]
+        self.ylen = self.data.shape[1]
+                                    
         """
         Y : torch.array
             Contains the length-adjusted time series (accounting for lags)
@@ -135,9 +142,8 @@ class VAR:
         row_count=1
         for lag in range(1, self.lags+1):
             for reg in range(self.ylen):
-                Z[row_count, :] = self.data[:,reg][(self.lags-lag):-lag]
-                row_count += 1
-                
+                Z[row_count, :] = self.data[:,reg][self.lags-lag:-lag]
+                row_count += 1     
         return(Z)
 
     def OLS(self):
@@ -165,18 +171,19 @@ class VAR:
         It is based on the assumption of normality of errors
         """     
         
-        par = torch.ones((self.ylen)**2 + self.ylen + self.ylen, requires_grad=True)
+        par = Variable(torch.ones(self.lags*(self.ylen**2) + self.ylen + self.ylen), requires_grad=True)
         
-        coef = torch.reshape(par[0:self.ylen**2], (self.ylen, self.ylen))
-        coef_mean = par[self.ylen**2:self.ylen**2+self.ylen]
-        coef_var = torch.diag(par[self.ylen**2+self.ylen:])    
+        coef = torch.reshape(par[0:self.lags*self.ylen**2], (self.ylen, self.lags*self.ylen))
+        coef_mean = par[self.lags*self.ylen**2:self.lags*self.ylen**2+self.ylen]
+        coef_var = torch.diag(par[self.lags*self.ylen**2+self.ylen:])    
         Z = self._design()[1:]
 
         Y_0 = torch.t(torch.t(self.Y) - coef_mean)
-        Z_0 = torch.t(torch.t(Z) - coef_mean)
+        Z_0 = torch.t(torch.t(Z) - coef_mean.repeat(self.lags))
         
-        learning_rate = 1e-4
-        optimizer = torch.optim.LBFGS(params = [par], lr=learning_rate)
+        learning_rate = 1e-5
+        
+        optimizer = torch.optim.LBFGS(params = [par], lr=learning_rate, max_iter=25)
         
         def closure():
             # Before the backward pass, use the optimizer object to zero all of the
@@ -185,7 +192,7 @@ class VAR:
             optimizer.zero_grad()
             
             # First way (without a constant term in the likelihood function):
-            loss = -( - .5*self.Y.shape[1]*torch.log(torch.abs(torch.det(coef_var))) - .5*torch.trace(torch.mm(torch.mm(torch.t(Y_0 - torch.mm(coef,Z_0)),torch.inverse(coef_var)),Y_0 - torch.mm(coef,Z_0))))
+            loss = -(- .5*self.Y.shape[1]*torch.log(torch.abs(torch.det(coef_var))) - .5*torch.trace(torch.mm(torch.mm(torch.t(Y_0 - torch.mm(coef,Z_0)),torch.inverse(coef_var)),Y_0 - torch.mm(coef,Z_0))))
 
 #              TO ADD: 
 #             Second way:
@@ -193,23 +200,41 @@ class VAR:
 #             loss = -torch.mean(dist.log_prob(Y_0))
             
             # Backward pass: compute gradient of the loss with respect to model parameters
-            loss.backward()
+            loss.backward(retain_graph = True)
+            
+            print(loss)
+            
             return loss
         
         # Calling the step function on an Optimizer makes an update to its parameters
-        for i in range(100):
+        
+        for i in range(50):
             optimizer.step(closure)
             
         return(par)
 
 
-# In[157]:
+# In[7]:
 
 
-# Estimate VAR(1) by MLE
+# Estimate VAR(p) by MLE
 
-MLE_results = VAR(data = df, lags = 1, target = None, integ = 0).MLE()
+MLE_results = VAR(data = df, lags = 3, target = None, integ = 1).MLE()
 MLE_results
+
+
+# In[8]:
+
+
+# For more clarity, let's consider the specific case of VAR(1)
+
+MLE_results = VAR(data = df, lags = 1, target = None, integ = 1).MLE();
+
+
+# In[9]:
+
+
+# Better visualisation of the results from previous cell
 
 par_names_MLE = ['A AR(1)','B to A AR(1)','C to A AR(1)','D to A AR(1)',
                  'B AR(1)','A to B AR(1)','C to B AR(1)','D to B AR(1)',
@@ -222,17 +247,21 @@ results_MLE = dict(zip(par_names_MLE, MLE_results.flatten()))
 results_MLE
 
 
-# In[38]:
+# In[10]:
 
 
-# Estimate VAR(1) by OLS
+# Estimate VAR(p) by OLS
 
-# In general
+OLS_results = VAR(data = df, lags = 3, target = None, integ = 3).OLS()
+print(OLS_results)
 
-OLS_results = VAR(data = df, lags = 1, target = None, integ = 0).OLS()
-OLS_results
 
-# For more clarity
+# In[11]:
+
+
+# For more clarity, let's consider the specific case of VAR(1)
+
+OLS_results = VAR(data = df, lags = 1, target = None, integ = 1).OLS()
 
 par_names_OLS = ['A Constant','A AR(1)','B to A AR(1)','C to A AR(1)','D to A AR(1)',
                  'B Constant','B AR(1)','A to B AR(1)','C to B AR(1)','D to B AR(1)',
