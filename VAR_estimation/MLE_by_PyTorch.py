@@ -21,7 +21,7 @@ torch.manual_seed(123)
 pio.templates.default = 'plotly_dark'
 init_notebook_mode(connected=True)
 
-# ## Simulation of stationary time-series
+# Simulation of stationary time-series
 
 # Time-series dimension of simulation
 
@@ -72,6 +72,10 @@ for i in range(0, df.shape[1]):
 
 fig['layout'].update(height=600, width=600, title='Time series')
 iplot(fig)
+
+
+pio.write_image(fig, 'Graphs/Simulated_time_series.png')
+
 
 # ## VAR
 
@@ -167,13 +171,13 @@ class VAR:
         It is based on the assumption of normality of errors
         """
 
-        par = Variable(torch.rand(self.lags * (self.ylen**2) +
-                                  self.ylen + self.ylen), requires_grad=True)
+        par = Variable(torch.rand(self.lags * (self.ylen**2)
+                                  + self.ylen + self.ylen), requires_grad=True)
 
         coef = reshape(par[0:self.lags * self.ylen**2],
                        (self.ylen, self.lags * self.ylen))
-        coef_mean = par[self.lags * self.ylen
-                        ** 2:self.lags * self.ylen**2 + self.ylen]
+        coef_mean = par[self.lags * self.ylen **
+                        2:self.lags * self.ylen**2 + self.ylen]
         coef_var = diag(exp(par[self.lags * self.ylen**2 + self.ylen:]))
         Z = self._design()[1:]
 
@@ -181,7 +185,7 @@ class VAR:
         Z_0 = t(t(Z) - coef_mean.repeat(self.lags))
 
         learning_rate = 1e-5
-        n_iter = 1000
+        n_iter = 100000
 
         optimizer = torch.optim.SGD(params=[par], lr=learning_rate)
 
@@ -191,7 +195,8 @@ class VAR:
             # of the model)
             optimizer.zero_grad()
 
-            # First way (without a constant term in the likelihood function):
+            # Without a constant term in the likelihood function:
+
             loss = -(-.5 * self.Y.shape[1] * log(torch.abs(det(coef_var))) - .5 * trace(
                 mm(mm(t(Y_0 - mm(coef, Z_0)), inverse(coef_var)), Y_0 - mm(coef, Z_0))))
 
@@ -225,7 +230,7 @@ par_names_MLE = ['A AR(1)', 'B to A AR(1)', 'C to A AR(1)', 'D to A AR(1)',
                  'B AR(1)', 'A to B AR(1)', 'C to B AR(1)', 'D to B AR(1)',
                  'C AR(1)', 'A to C AR(1)', 'B to C AR(1)', 'D to C AR(1)',
                  'D AR(1)', 'A to D AR(1)', 'B to D AR(1)', 'C to D AR(1)',
-                 'A Constant', 'B Constant', 'C Constant', 'D Constant',
+                 'A mean', 'B mean', 'C mean', 'D mean',
                  'logVar(A)', 'logVar(B)', 'logVar(C)', 'logVar(D)']
 
 results_MLE = dict(zip(par_names_MLE, MLE_results[0].flatten()))
@@ -252,6 +257,8 @@ layout = go.Layout(
     title=('Loss function per iteration'))
 figure = go.Figure(data=[loss_to_plot], layout=layout)
 iplot(figure)
+
+pio.write_image(figure, 'Graphs/Loss function per iteration.png')
 
 # Plotting parameters
 
