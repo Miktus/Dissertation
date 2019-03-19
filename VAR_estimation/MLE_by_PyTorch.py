@@ -185,7 +185,7 @@ class VAR:
         Z_0 = t(t(Z) - coef_mean.repeat(self.lags))
 
         learning_rate = 1e-5
-        n_iter = 100000
+        n_iter = 10000
 
         optimizer = torch.optim.SGD(params=[par], lr=learning_rate)
 
