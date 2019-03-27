@@ -458,61 +458,64 @@ def LinApp_Solve(AA, BB, CC, DD, FF, GG, HH, JJ, KK, LL, MM, WWW, TT, NN, Z0, Sy
 
     # Now we use LL, NN, RR, VV to get the QQ, RR, SS, VV matrices.
     # first try using Sylvester equation solver
-    # if ny > 0:
-    #     PM = (FF-la.solve(JJ.dot(CC), AA))
-    #     if npla.matrix_rank(PM) < nx+ny:
-    #         Sylv = 0
-    #         print("Sylvester equation solver condition is not satisfied;"
-    #               + " proceed with the original method...")
-    # else:
-    #     if npla.matrix_rank(FF) < nx:
-    #         Sylv = 0
-    #         print("Sylvester equation solver condition is not satisfied;"
-    #               + " proceed with the original method...")
-    # if Sylv:
-    #     print("Using Sylvester equation solver...")
-    #     if ny > 0:
-    #         Anew = la.solve(PM, (FF.dot(PP)+GG+JJ.dot(RR) -
-    #                              la.solve(KK.dot(CC), AA)))
-    #         Bnew = NN
-    #         Cnew1 = la.solve(JJ.dot(CC), DD.dot(NN))+la.solve(KK.dot(CC), DD) -\
-    #             LL.dot(NN)-MM
-    #         Cnew = la.solve(PM, Cnew1)
-    #         QQ = la.solve_sylvester(Anew, Bnew, Cnew)
-    #         SS = la.solve(-CC, (AA.dot(QQ)+DD))
-    #     else:
-    #         Anew = la.solve(FF, (FF.dot(PP)+GG))
-    #         Bnew = NN
-    #         Cnew = la.solve(FF, (-LL.dot(NN)-MM))
-    #         QQ = la.solve_sylvester(Anew, Bnew, Cnew)
-    #         SS = np.zeros((0, nz))  # empty matrix
-    # then the Uhlig's way
-    # else:
-    if (npla.matrix_rank(VV) < nz * (nx + ny)):
-        print("Sorry but V is not invertible. Can't solve for Q and S;" +
-              " but we proceed anyways...")
-
-    LL = sp.mat(LL)
-    NN = sp.mat(NN)
-    LLNN_plus_MM = dot(LL, NN) + MM
-
-    if DD.any():
-        impvec = vstack([DD.T, np.reshape(LLNN_plus_MM, (nx * nz, 1), 'F')])
+    if ny > 0:
+        # PM = (FF-la.solve(JJ.dot(CC), AA))
+        PM = (FF - JJ.dot(la.solve(CC, AA)))
+        if npla.matrix_rank(PM) < nx+ny:
+            Sylv = 0
+            print("Sylvester equation solver condition is not satisfied;"
+                  + " proceed with the original method...")
     else:
-        impvec = np.reshape(LLNN_plus_MM, (nx * nz, 1), 'F')
+        if npla.matrix_rank(FF) < nx:
+            Sylv = 0
+            print("Sylvester equation solver condition is not satisfied;"
+                  + " proceed with the original method...")
+    if Sylv:
+        print("Using Sylvester equation solver...")
+        if ny > 0:
+            Anew = la.solve(PM, (FF.dot(PP)+GG+JJ.dot(RR) -
+                                 la.solve(KK.dot(CC), AA)))
+            Bnew = NN
+            Cnew1 = la.solve(JJ.dot(CC), DD.dot(NN))+la.solve(KK.dot(CC), DD) -\
+                LL.dot(NN)-MM
+            Cnew = la.solve(PM, Cnew1)
+            QQ = la.solve_sylvester(Anew, Bnew, Cnew)
+            SS = la.solve(-CC, (AA.dot(QQ)+DD))
+        else:
+            Anew = la.solve(FF, (FF.dot(PP)+GG))
+            Bnew = NN
+            Cnew = la.solve(FF, (-LL.dot(NN)-MM))
+            QQ = la.solve_sylvester(Anew, Bnew, Cnew)
+            SS = np.zeros((0, nz))  # empty matrix
+    # then the Uhlig's way
+    else:
+        if (npla.matrix_rank(VV) < nz * (nx + ny)):
+            print("Sorry but V is not invertible. Can't solve for Q and S;" +
+                  " but we proceed anyways...")
 
-    QQSS_vec = np.matrix(la.solve(-VV, impvec))
+        LL = sp.mat(LL)
+        NN = sp.mat(NN)
+        LLNN_plus_MM = dot(LL, NN) + MM
 
-    if (max(abs(QQSS_vec)) == sp.inf).any():
-        print("We have issues with Q and S. Entries are undefined." +
-              " Probably because V is no inverible.")
+        if DD.any():
+            DD = np.array(DD).T.ravel().reshape((-1, 1))
+            LLNN_plus_MM = np.array(LLNN_plus_MM).reshape((-1, 1))
+            impvec = np.vstack((DD, LLNN_plus_MM))
+        else:
+            impvec = LLNN_plus_MM.flatten()
 
-    # Build QQ SS
-    QQ = np.reshape(np.matrix(QQSS_vec[0:nx * nz, 0]),
-                    (nx, nz), 'F')
+        QQSS_vec = np.matrix(la.solve(-VV, impvec))
 
-    SS = np.reshape(QQSS_vec[(nx * nz):((nx + ny) * nz), 0],
-                    (ny, nz), 'F')
+        if (max(abs(QQSS_vec)) == sp.inf).any():
+            print("We have issues with Q and S. Entries are undefined." +
+                  " Probably because V is no inverible.")
+
+        # Build QQ SS
+        QQ = np.reshape(np.matrix(QQSS_vec[0:nx * nz, 0]),
+                        (nx, nz), 'F')
+
+        SS = np.reshape(QQSS_vec[(nx * nz):((nx + ny) * nz), 0],
+                        (ny, nz), 'F')
 
     # Build WW - WW has the property [x(t)',y(t)',z(t)']=WW [x(t)',z(t)'].
     WW = sp.vstack((
