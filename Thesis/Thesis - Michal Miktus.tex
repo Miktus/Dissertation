@@ -48,7 +48,7 @@
 \numberwithin{equation}{section}
 
 \lstset{ %
-  language=dynare,                     % the language of the code
+  language=MATLAB,                     % the language of the code
   basicstyle=\footnotesize,       % the size of the fonts that are used for the code
   numbers=left,                   % where to put the line-numbers
   numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
@@ -125,7 +125,8 @@ to DSGE estimation}
    
    Date  \hfill Signature of the Author 
     \vspace{3cm}
-    \end{titlepage}
+ 
+\end{titlepage}
     
 \begin{abstract}
 Here goes the abstract. \\
@@ -574,6 +575,10 @@ To sum up, in order to calculate the results, two systems have to be created: on
 
 \section{Solution}
 
+Since \citet{blanchard1980solution} a number of alternative approaches for solving linear rational expectations models have emerged, not to mention the methods of \citet{uhlig1998toolkit}, \citet{klein2000using} or \citet{sims2002solving}. Economists use then their output for simulating models, estimating models, computing impulse response functions, calculating asymptotic covariance, solving infinite horizon linear quadratic control problems and constructing terminal constraints for nonlinear models. Despite the fact that for models satisfying the \citet{blanchard1980solution} conditions, the algorithms provide equivalent solutions, two algorithms will be presented in depth: the approach of \citet{klein2000using} for the illustrational purposes and the \citet{uhlig1998toolkit} toolkit for the actual implementation in Python.
+
+\subsection{\citet{klein2000using} approach}
+
 DSGE model consists of state variables ($x_{t}$), control variables ($y_{t}$), transition equations for structural shocks and measurement errors ($\varepsilon_{t}$) and a vector of deep parameters $\theta$, which can be cast into a nonlinear first-order system of expectational difference equations:
 
 \begin{align}
@@ -767,7 +772,7 @@ Solving the lower block first:
 
 Note that due to the ordering $|s_{ii}|<|t_{ii}|$ (or $|s_{ii}|\leq|t_{ii}|$ ). Using backward-substitution, it can be shown, that any solution with bounded mean and variance must satisfy $u_t=0$ for all $t$ (unless $\Sigma=0$), otherwise the solution explodes. In other words, as many state variables as there are generalized eigenvalues with $|s_{ii}|>|t_{ii}|$ are needed. This property has a name:
 
-\begin{mydef}[Blanchard/Khan-conditions]
+\begin{mydef}[\citet{blanchard1980solution} conditions]
 The number of generalized eigenvalues, that are in absolute terms greater than 1, must be equal to the number of state variables, in order to get a stable solution (saddle-path).
 \end{mydef}
 
@@ -808,7 +813,7 @@ Thus, in order to compute $h_x$, nonsingular $S_{11}$ and $Z_{11}$ are required.
  \KwResult{DSGE solution\;}
 Compute generalized Schur decomposition of $A=-\begin{bmatrix} f_1 & f_2\end{bmatrix}$ and $B=\begin{bmatrix} f_3 & f_4\end{bmatrix}$\;
 Reorder generalized eigenvalues such that $|s_{ii}|>|t_{ii}|$ in the upper left\;
-  \eIf{Blanchard-Khan condition fulffiled}{
+  \eIf{\citet{blanchard1980solution} condition fulffiled}{
    \eIf{$Z_{11}$ invertible}{
 Compute $h_x=Z_{11} S_{11}^{-1} T_{11} Z_{11}^{-1}$ and $g_x=Z_{21} Z_{11}^{-1}$\;
 }{
@@ -820,10 +825,112 @@ Infeasible solution\;}
 
 \bigbreak
 
-To conclude, even though agents take the effect of future shocks into account when optimizing, in a linearization to the first-order they don't matter for the decision rule.
+Note that the squareness of $Z_{11}$ is referred to in the literature as the \citet{blanchard1980solution} order condition, while the non-singularity of $Z_{11}$ as the \citet{blanchard1980solution} rank condition.
+
+\subsection{\citet{uhlig1998toolkit} toolkit}
+
+The \citet{uhlig1998toolkit} algorithm uses generalized eigenvalue calculations to obtain a solution for the matrix polynomial equation, based on the method of undetermined coefficients. The method is applied to systems written as:
+
+\begin{align}
+0 &= Ax' + Bx + Cy + Dz \nonumber \\
+0 &=\mathbb{E} \left[Fx'' + Gx' + Hx + Jy' + Ky + Lz' + Mz \right] \nonumber \\
+z' &= Nz + \varepsilon'
+\end{align}
+
+where $x$ are the endogenous state variables, $y$ the endogenous control (also called \textit{jump}) variables, while $z$ denotes the exogenous variables. Moreover, the apostrof stands for the leading operator.
+
+Assuming that the decision rules can be expressed as:
+
+\begin{align}
+x' &= Px + Qz \nonumber \\
+y &= Rx + Sz
+\end{align}
+
+one can substitute the decision rules into the system:
+
+\begin{align}
+0 &= (AP+B+CR)x+(AQ+CS+D)z \nonumber \\
+0 &= (GP+H+JRP+KR)x+(GQ+JRQ+JSN+KS+M)z
+\end{align}
+
+Since these equations must hold for any $x$ and $z$:
+
+\begin{align}
+0 &= AP+B+CR  \label{Uhlig1} \\
+0 &= AQ+CS+D  \label{Uhlig2} \\
+0 &= GP+H+JRP+KR  \label{Uhlig3} \\
+0 &= GQ+JRQ+JSN+KS+M \label{Uhlig4}
+\end{align}
+
+Solving \ref{Uhlig1} for $R$:
+
+\begin{align}
+R = -C^{-1} \left(AP + B \right)
+\end{align}
+
+Substituting it for R into equation \ref{Uhlig3}:
+
+\begin{align}
+-JC^{-1}AP^{2} - \left(JC^{-1}B + KC^{-1}A - G \right)P - \left(KC^{-1}B - H \right) = 0
+\end{align} 
+
+The above-mentioned quadratic matrix equation in $P$ can be then solved by generalized Schur decomposition. Next, solving for $S$ as the function of $Q$ with \ref{Uhlig2}:
+
+\begin{align}
+S = -C^{-1} \left(AQ + D \right)
+\end{align}
+
+Substituting further in \ref{Uhlig4}
+
+\begin{align}
+GQ+JRQ-JC^{-1} (AQ+D)N - KC^{-1} (AQ+D)+M &= 0 \nonumber \\
+\Rightarrow \left(G + JR - KC^{-1}A \right)Q - JC^{-1}DN - KC^{-1}D + M &= 0
+\end{align}
+
+Matrix $Q$ is the only unknown, but it is not trivial, as $Q$ is sandwiched. Nevertheless, one can use the Kronecker product $\otimes$ such that $vec \left(XYZ\right) = \left(Z^{T} \otimes X \right) vec(Y)$, applied to \ref{Uhlig4}:
+
+\begin{align}
+0 &= I \otimes \left(G + JR - KC^{-1}A \right) vec(Q) - N^{T} \otimes \left(JC^{-1}A\right) vec(Q) - vec\left(JC^{-1}DN - KC^{-1}D + M \right) \nonumber \\
+& \Rightarrow vec(Q) = \left[ I \otimes \left(G + JR - KC^{-1}A \right) - N^{T} \otimes \left(JC^{-1}A \right)\right]^{-1} vec\left(JC^{-1}DN - KC^{-1}D + M \right)
+\end{align}
+
+It has to be underlined that for the \citet{uhlig1998toolkit} procedure, one must choose \textit{jump} variables to guarantee that the $C$ matrix has full rank, i.e. augment the system with a \textit{dummy variable} and respective equations.
+
+Solution of \citet{uhlig1998toolkit} toolkit is a state space system: a transition equation supplemented with a measurement equation. Moreover, it can be viewed as a restricted VAR(1):
+
+\begin{align}
+Y' = B_{1}Y+ B_{0}z
+\end{align}
+
+where:
+
+\begin{align}
+\left\{
+\begin{array}{cl}
+B_{0} = \begin{bmatrix}
+    SS \\
+    QQ
+\end{bmatrix} \\
+B1 =  \begin{bmatrix}
+    0 & RR \\
+    0 & PP
+\end{bmatrix} \\
+Y' = \begin{bmatrix}
+    y' \\
+    x'
+\end{bmatrix}
+\end{array}
+\right.
+\end{align}
+
+Finally, it has to be emphasised that the Ulhig and Klein solutions are equivalent (\citet{bonaldi2010identification}).
+
+\subsection{Certainty-equivalence-property}
+
+To conclude the solution section, even though agents take the effect of future shocks into account when optimizing, in a linearization to the first-order they don't matter for the decision rule.
 
 \begin{mydef}[Certainty-equivalence-property]
-     In a first-order approximation the constant term needs not to be corrected for uncertainty (i.e. variance of shocks). Moreover, expectation of $x_t$ and $y_t$ is equal to its non-stochastic steady-state.
+In a first-order approximation the constant term needs not to be corrected for uncertainty (i.e. variance of shocks). Moreover, expectation of $x_t$ and $y_t$ is equal to its non-stochastic steady-state.
 \end{mydef}
 
 This is problematic when uncertainty does matter, not to mention the risk premium or welfare evaluation. A second-order approximation can be then implemented, thus being regarded as a potential extension.
