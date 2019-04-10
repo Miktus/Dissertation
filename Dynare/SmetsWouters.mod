@@ -179,6 +179,7 @@ ipred = M_.nstatic+(1:M_.nspred)';
 obs_var=oo_.dr.inv_order_var(options_.varobs_id);
 %get observation equation matrices
 [C,D] = kalman_transition_matrix(oo_.dr,obs_var,1:M_.nspred,M_.exo_nbr);
+temp = oo_.dr
 		
 %--------------------------------------------------------------------------
 % 7. Estimation

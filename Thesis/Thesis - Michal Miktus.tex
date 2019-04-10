@@ -907,15 +907,15 @@ where:
 \begin{align}
 \left\{
 \begin{array}{cl}
-B_{0} = \begin{bmatrix}
+B_{0} &= \begin{bmatrix}
     SS \\
     QQ
 \end{bmatrix} \\
-B1 =  \begin{bmatrix}
+B1 &=  \begin{bmatrix}
     0 & RR \\
     0 & PP
 \end{bmatrix} \\
-Y' = \begin{bmatrix}
+Y' &= \begin{bmatrix}
     y' \\
     x'
 \end{bmatrix}
@@ -923,7 +923,71 @@ Y' = \begin{bmatrix}
 \right.
 \end{align}
 
-Finally, it has to be emphasised that the Ulhig and Klein solutions are equivalent (\citet{bonaldi2010identification}).
+Finally, it has to be emphasised that the \citet{uhlig1998toolkit} and \citet{klein2000using} solutions are equivalent (\citet{bonaldi2010identification}).
+
+\subsection{Linear Time Iteration Procedure}
+
+\citet{uhlig1998toolkit} procedure provided the foundations for the techniques to solve a  \citet{smets2003estimated} model. Nevertheless, due to the implementation of non-differentiable QZ-algorithm, its usefulness for the machine learning frameworks exploiting the benefits of automatic differentiation is questionable. Therefore, the Linear Time Iteration Procedure of \cite{rendahl2017linear} is proposed as an alternative, yielding identical results to the \citet{uhlig1998toolkit} approach.
+
+The model of interest is once again given by:
+
+\begin{align}
+Ax_{t-1} + Bx_{t} + Cx_{t+1} + u_{t} = 0
+\end{align}
+
+where $x_{t}$ is an $n \times 1$ vector containing endogenous and exogenous variables, $u_{t}$ is an $n \times 1$ vector of mean-zero disturbances, and $A$, $B$ and $C$ are conformable matrices.
+
+The assumed form of the recursive solutions is as follows:
+
+\begin{align}
+x_{t} = Fx_{t-1} + Qu_{t}
+\end{align}
+
+Inserting into the previous equation:
+
+\begin{align}
+Ax_{t-1} + Bx_{t} + CFx_{t} + u_{t} = 0
+\end{align}
+
+Thus, the matrix $Q$ is given by:
+
+\begin{align}
+Q = -\left( B + CF \right)^{-1}
+\end{align}
+
+Moreover, $F$ must be the solution to the quadratic matrix equation:
+
+\begin{align}
+A + BF + CF^{2} = 0
+\end{align}
+
+Undoubtedly, if $F$ is known, finding $Q$ is a trivial operation, therefore one should focus on finding $F$. Recall that it is sufficient to solve the deterministic part of the problem in order to retrieve it:
+
+\begin{align}
+Ax_{t-1} + Bx_{t} + Cx_{t+1}  = 0
+\end{align}
+
+Suppose one has a candidate solvent: $F_{n}$. Then consider solving the following problem for $x_{t}$:
+
+\begin{align}
+Ax_{t-1} + Bx_{t} + CF_{n}x_{t}  = 0
+\end{align}
+
+The solution is trivially given by:
+
+\begin{align}
+x_{t} = -\left( B + CF_{n} \right)^{-1} Ax_{t-1}
+\end{align}
+
+Thus, the initial guess should be updated according to:
+
+\begin{align}
+F_{n+1} = -\left( B + CF_{n} \right)^{-1} A
+\end{align}
+
+Furthermore, the author proves that the above-mentioned procedure converges to the DSGE solution under the \citet{blanchard1980solution} conditions and provides an enhanced technique to deal with common situations in which solvents contain eigenvalues that are zero.
+
+In addition, {\color{red} ADD PABLO RESULTS}.
 
 \subsection{Certainty-equivalence-property}
 

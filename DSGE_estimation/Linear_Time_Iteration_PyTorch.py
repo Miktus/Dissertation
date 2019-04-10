@@ -4,9 +4,7 @@ in the spirit of P. Rendahl (2017)
 Final version written by Michal Miktus, April 2019
 """
 
-import numpy as np
-from numpy import linalg as npla
-from numpy import eye, absolute, amax
+from torch import eye, abs, max, gesv, inverse, mm, matrix_power, eig, zeros
 
 def Linear_Time_Iteration(A, B, C, mu, epsilon):
     """
@@ -15,56 +13,58 @@ def Linear_Time_Iteration(A, B, C, mu, epsilon):
     with a recursive solution in the form of X = FX(-1) + Q*epsilon
     Parameters
     ----------
-    A : array_like, dtype=float
+    A : torch, array_like, dtype=float
         The matrix of coefficients next to endogenous variables entering with a lag
-    B : array_like, dtype=float
+    B : torch, array_like, dtype=float
         The matrix of coefficients next to endogenous, contemporanous variables
-    C : array_like, dtype=float
+    C : torch, array_like, dtype=float
         The matrix of coefficients next to endogenous variables entering with a lead
     mu : number, dtype=float
         Small positive real number to be multiplied by a conformable identity matrix
     epsilon : number, dtype=float
-        Threshold value, should be set to a small value
+        Threshold value, should be set to a small value like 1e-16
     Returns
     -------
-    F : array_like, dtype=float
+    F : torch, array_like, dtype=float
         The matrix of coefficients next to the endogenous variable in the solution
-    Q : array_like, dtype=float
+    Q : torch, array_like, dtype=float
         The matrix of coefficients next to the disturbance term in the solution
     Notes
     -----
     """
-    F = 0
-    S = 0
+    F = zeros(*A.shape)
+    S = zeros(*A.shape)
 
-    I = eye(*A.shape)*mu
+    # F.requires_grad_()
+    # S.requires_grad_()
+
+    I = eye(*A.shape) * mu
     Ch = C
-    Bh = (B + 2*C.dot(I))
-    Ah = (C.dot(npla.matrix_power(I, 2)) + B.dot(I) + A)
-
-    if (1/npla.cond(Ah))<1e-16:
-        print('Matrix Ah is singular')
+    Bh = (B + 2 * mm(C, I))
+    Ah = (mm(C, matrix_power(I, 2)) + mm(B, I) + A)
 
     metric = 1
     iter = 1
 
     while metric>epsilon:
-        print(iter)
-        F = -npla.solve((Bh + Ch.dot(F)), Ah)
-        S = -npla.solve((Bh + Ah.dot(S)), Ch)
-        metric1 = amax(absolute(Ah + Bh.dot(F) + Ch.dot(F.dot(F))))
-        metric2 = amax(absolute(Ah.dot(S.dot(S)) + Bh.dot(S) + Ch))
-        metric = amax([metric1, metric2])
+        # print(iter)
+        F = -gesv(Ah, (Bh + mm(Ch, F)))[0]
+        S = -gesv(Ch, (Bh + mm(Ah, S)))[0]
+        metric1 = max(abs(Ah + mm(Bh, F) + mm(Ch, (mm(F, F)))))
+        metric2 = max(abs(mm(Ah, mm(S, S)) + mm(Bh, S) + Ch))
+        metric = max(metric1, metric2)
         iter += 1
+        if iter > 25000:
+            break
 
-    eig_F = amax(absolute(npla.eigvals(F)))
-    eig_S = amax(absolute(npla.eigvals(S)))
+    # eig_F = max(abs(eig(F)[0]))
+    # eig_S = max(abs(eig(S)[0]))
 
-    if (eig_F > 1) or (eig_S > 1) or (mu > 1-eig_S):
-        print('Conditions of Proposition 3 violated')
+    # if (eig_F > 1) or (eig_S > 1) or (mu > 1-eig_S):
+    #     print('Conditions of Proposition 3 violated')
 
-    F = F+I
-    Q = -npla.inv(B + C.dot(F))
+    F = F + I
+    Q = -inverse(B + mm(C, F))
 
     return F, Q
 

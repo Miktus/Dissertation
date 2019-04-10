@@ -17,7 +17,7 @@
 	var  e_a e_I e_b e_L e_G e_pi  one pi w K Q I C R r L Y pi_f w_f K_f Q_f I_f C_f R_f r_f L_f Y_f;
 	varexo ee_a ee_I ee_b ee_L ee_G ee_pi n_p n_Q n_R n_w; 
 	parameters h sigma_c beta adj tau gamma_p xi_p alpha gamma_w xi_w sigma_L lambda_w psi phi k g rho r_pi r_Y r_dpi r_dY r_k rho_a rho_I rho_b rho_L rho_G rho_pi sd_Q sd_p sd_w sd_R;
-	%varobs Y C I pi w L R; 
+	varobs C I L; 
 	
 %--------------------------------------------------------------------------
 % 2. Set parameters
@@ -58,7 +58,7 @@
     
     sd_p        = 0.16;
     sd_w        = 0.289;
-    sd_Q        = 0.604; 
+    sd_Q        = 0.604;
     
 
 %--------------------------------------------------------------------------
@@ -102,7 +102,7 @@
     % System 2: Flexible System
     
     % Price Stickyness: xi_p = 0 
-    % Wage Stickyness: xi_w = 0;
+    % Wage Stickyness: xi_w = 0
     % Cost shocks: n_p = 0, n_Q = 0, n_w = 0
     
     C_f     = (h/(1 + h))*C_f(-1) + (1/(1 + h))*C_f(+1) - ((1 - h)/((1 + h)*sigma_c))*(R_f - pi_f(+1)) + ((1 - h)/((1 + h)*sigma_c))*(e_b-e_b(+1));
@@ -169,7 +169,17 @@
 % 6. Solution & Simulation
 %--------------------------------------------------------------------------
 steady; check;
-stoch_simul(periods=10000,irf=0,order=1,simul_replic=1000,noprint); 
+stoch_simul(periods=1000,irf=0,order=1,simul_replic=100); 
+
+%get state indices
+ipred = M_.nstatic+(1:M_.nspred)';
+%get state transition matrices
+[A,B] = kalman_transition_matrix(oo_.dr,ipred,1:M_.nspred,M_.exo_nbr);
+%get observable position in decision rules
+obs_var=oo_.dr.inv_order_var(options_.varobs_id);
+%get observation equation matrices
+[C,D] = kalman_transition_matrix(oo_.dr,obs_var,1:M_.nspred,M_.exo_nbr);
+temp = oo_.dr
 		
 %--------------------------------------------------------------------------
 % 7. Estimation
