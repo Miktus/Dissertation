@@ -5,6 +5,7 @@ Final version written by Michal Miktus, April 2019
 
 from torch import zeros, cat, eye
 from Linear_Time_Iteration_PyTorch import Linear_Time_Iteration
+import pickle
 
 def Solution(betta = 0.99, tau = 0.025, alphaa = 0.3, psi = 1/0.169, gamma_p = 0.469,
              gamma_w = 0.763, lambda_w = 0.5, xi_p = 0.908, xi_w = 0.737, sigma_L = 2.4,
@@ -272,6 +273,9 @@ def Solution(betta = 0.99, tau = 0.025, alphaa = 0.3, psi = 1/0.169, gamma_p = 0
     B = cat((cat((matrix_names[0], matrix_names[2], matrix_names[3]), 1), cat((matrix_names[5], matrix_names[8], matrix_names[10]), 1),
              cat((zeros((nz, nx)), zeros((nz, ny)), -eye((nz))), 1)), 0)
     C = cat((zeros((ny, nx + ny+nz)), cat((matrix_names[4], matrix_names[7], matrix_names[9]), 1), zeros((nz, nx+ny+nz))), 0)
+
+    with open('MatricesABC_values.pickle', 'wb') as f:
+        pickle.dump([A, B, C], f)
 
     F_iter, Q_iter = Linear_Time_Iteration(A, B, C, 1e-16, 1e-4)
 

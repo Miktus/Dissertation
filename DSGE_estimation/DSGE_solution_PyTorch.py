@@ -179,144 +179,144 @@ F, Q, nx, ny, nz = Solution(betta = betta, tau = tau, alphaa = alphaa, psi = psi
              sigma_c = sigma_c, h = h, phi = phi, adj = adj, k = k, g = g, r_dpi = r_dpi, r_Y = r_Y,
              r_dY = r_dY, rho = rho, r_pi = r_pi, rho_L = rho_L, rho_a = rho_a, rho_b = rho_b, rho_G = rho_G,
              rho_pi = rho_pi, rho_I = rho_I, sd_R = sd_R, sd_p = sd_p, sd_w = sd_w, sd_Q = sd_Q)
-
-# --------------------------------------------------------------------------
-# --- Simulation
-# --------------------------------------------------------------------------
-
-T = 1000  # Number of periods to simulate
-
-epsilon = tensor([normal(mean = 0, std = sd_Q), normal(mean = 0, std = sd_p), normal(mean = 0, std = sd_w),
-                  normal(mean = 0, std = sd_R)])
-epsilon = cat((randn(6), epsilon))
-epsilon = cat((zeros((nx+ny)), epsilon))
-
-X_sim = zeros((nx+ny+nz, T))
-X_sim[:, 0] = squeeze(mm(Q, torch.t(unsqueeze(epsilon, 0))))
-
-for t in range(1, T):
-    epsilon = tensor([normal(mean=0, std=sd_Q),
-                        normal(mean=0, std=sd_p), normal(mean=0, std=sd_w),
-                        normal(mean=0, std=sd_R)])
-    epsilon = cat((randn(6), epsilon))
-    epsilon = cat((zeros((nx + ny)), epsilon))
-    X_sim[:, t] = squeeze(mm(F, torch.t(unsqueeze(X_sim[:, t-1].clone(), 0))) + mm(Q, torch.t(unsqueeze(epsilon, 0))))
-
-# Plot for consumption
-
-# plt.plot(X_sim[11,:].detach().numpy())
-# plt.show()
-
-
-# --------------------------------------------------------------------------
-# --- Estimation on real data (TO BE DONE)
-# --------------------------------------------------------------------------
-# Get some data
-# start='1984-01'
-# end = '2015-01'
-# labor = DataReader('HOANBS', 'fred', start=start, end=end)        # hours
-# consumption = DataReader('PCECC96', 'fred', start=start, end=end) # billions of dollars
-# investment = DataReader('GPDI', 'fred', start=start, end=end)     # billions of dollars
-# population = DataReader('CNP16OV', 'fred', start=start, end=end)  # thousands of persons
-# recessions = DataReader('USRECQ', 'fred', start=start, end=end)
 #
-# # Collect the raw values
-# raw = pd.concat((labor, consumption, investment, population.resample('QS').mean()), axis=1)
-# raw.columns = ['labor', 'consumption', 'investment', 'population']
-# raw['output'] = raw['consumption'] + raw['investment']
+# # --------------------------------------------------------------------------
+# # --- Simulation
+# # --------------------------------------------------------------------------
 #
-# # Make the data consistent with the model
-# y = np.log(raw.output * 10**(9-3) / raw.population)
-# n = np.log(raw.labor * (1e3 * 40) / raw.population)
-# c = np.log(raw.consumption * 10**(9-3) / raw.population)
+# T = 1000  # Number of periods to simulate
 #
-# # Make the data stationary
-# y = y.diff()[1:]
-# n = n.diff()[1:]
-# c = c.diff()[1:]
+# epsilon = tensor([normal(mean = 0, std = sd_Q), normal(mean = 0, std = sd_p), normal(mean = 0, std = sd_w),
+#                   normal(mean = 0, std = sd_R)])
+# epsilon = cat((randn(6), epsilon))
+# epsilon = cat((zeros((nx+ny)), epsilon))
 #
-# # Construct the final dataset
-# econ_observed = pd.concat((y, n, c), axis=1)
-# econ_observed.columns = ['output','labor','consumption']
+# X_sim = zeros((nx+ny+nz, T))
+# X_sim[:, 0] = squeeze(mm(Q, torch.t(unsqueeze(epsilon, 0))))
 #
-# fig, ax = plt.subplots(figsize=(13,4))
+# for t in range(1, T):
+#     epsilon = tensor([normal(mean=0, std=sd_Q),
+#                         normal(mean=0, std=sd_p), normal(mean=0, std=sd_w),
+#                         normal(mean=0, std=sd_R)])
+#     epsilon = cat((randn(6), epsilon))
+#     epsilon = cat((zeros((nx + ny)), epsilon))
+#     X_sim[:, t] = squeeze(mm(F, torch.t(unsqueeze(X_sim[:, t-1].clone(), 0))) + mm(Q, torch.t(unsqueeze(epsilon, 0))))
 #
-# dates = econ_observed.index._mpl_repr()
+# # Plot for consumption
 #
-# ax.plot(dates, econ_observed.output, label='Output')
-# ax.plot(dates, econ_observed.labor, label='Labor')
-# ax.plot(dates, econ_observed.consumption, label='Consumption')
+# # plt.plot(X_sim[11,:].detach().numpy())
+# # plt.show()
 #
-# rec = recessions.resample('QS').last().loc[econ_observed.index[0]:].iloc[:, 0].values
-# ylim = ax.get_ylim()
-# ax.fill_between(dates, ylim[0]+1e-5, ylim[1]-1e-5, rec, facecolor='k', alpha=0.1)
 #
-# ax.xaxis.grid()
-# ax.legend(loc='lower left')
-# plt.show()
-
-# --------------------------------------------------------------------------
-# --- Estimation
-# --------------------------------------------------------------------------
-
-# Observables: labor, consumption, investment
-# Indexes: 14, 11, 10
-
-no = 3  # Number of observables
-
-observation_matrix =  tensor([
-    [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.,
-        0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
-    [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.,
-        0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
-    [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0.,
-        0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]], requires_grad = True)
-
-# observation_matrix = zeros((no, nx+ny+nz), requires_grad=True)
-# observation_matrix[0,10] = observation_matrix[1,11] = observation_matrix[2,14] = 1
-
-observables = X_sim[(10,11,14), :]
-
-# Optimization
-
-from Loss_function_PyTorch import loss_function
-
-par = torch.rand(1, requires_grad=True)
-learning_rate = 1e-5
-n_iter = 50
-
-optimizer = torch.optim.SGD(params=[par], lr=learning_rate)
-
-# optimizer.zero_grad()
-# loss = loss_function(par, observation_matrix, observables,  X_sim[:, 0])
-# print(loss)
-# loss.backward()
-# optimizer.step()
-
-def closure():
-    # Before the backward pass, use the optimizer object to zero all of the
-    # gradients for the Tensors it will update (which are the learnable weights
-    # of the model)
-    optimizer.zero_grad()
-
-    # Without a constant term in the likelihood function:
-
-    loss_value = loss_function(par, observation_matrix, observables,  X_sim[:, 0])
-
-    # Backward pass: compute gradient of the loss with respect to model parameters
-
-    loss_value.backward(retain_graph=True)
-
-    return loss_value, par
-
-# Calling the step function on an Optimizer makes an update to its parameters
-
-loss_vector = torch.empty(n_iter)
-par_vector = torch.empty(n_iter)
-
-for i in range(n_iter):
-    print(i)
-    optimizer.step(closure)
-    loss_vector[i], par_vector[i] = closure()
-
-print(par_vector)
+# # --------------------------------------------------------------------------
+# # --- Estimation on real data (TO BE DONE)
+# # --------------------------------------------------------------------------
+# # Get some data
+# # start='1984-01'
+# # end = '2015-01'
+# # labor = DataReader('HOANBS', 'fred', start=start, end=end)        # hours
+# # consumption = DataReader('PCECC96', 'fred', start=start, end=end) # billions of dollars
+# # investment = DataReader('GPDI', 'fred', start=start, end=end)     # billions of dollars
+# # population = DataReader('CNP16OV', 'fred', start=start, end=end)  # thousands of persons
+# # recessions = DataReader('USRECQ', 'fred', start=start, end=end)
+# #
+# # # Collect the raw values
+# # raw = pd.concat((labor, consumption, investment, population.resample('QS').mean()), axis=1)
+# # raw.columns = ['labor', 'consumption', 'investment', 'population']
+# # raw['output'] = raw['consumption'] + raw['investment']
+# #
+# # # Make the data consistent with the model
+# # y = np.log(raw.output * 10**(9-3) / raw.population)
+# # n = np.log(raw.labor * (1e3 * 40) / raw.population)
+# # c = np.log(raw.consumption * 10**(9-3) / raw.population)
+# #
+# # # Make the data stationary
+# # y = y.diff()[1:]
+# # n = n.diff()[1:]
+# # c = c.diff()[1:]
+# #
+# # # Construct the final dataset
+# # econ_observed = pd.concat((y, n, c), axis=1)
+# # econ_observed.columns = ['output','labor','consumption']
+# #
+# # fig, ax = plt.subplots(figsize=(13,4))
+# #
+# # dates = econ_observed.index._mpl_repr()
+# #
+# # ax.plot(dates, econ_observed.output, label='Output')
+# # ax.plot(dates, econ_observed.labor, label='Labor')
+# # ax.plot(dates, econ_observed.consumption, label='Consumption')
+# #
+# # rec = recessions.resample('QS').last().loc[econ_observed.index[0]:].iloc[:, 0].values
+# # ylim = ax.get_ylim()
+# # ax.fill_between(dates, ylim[0]+1e-5, ylim[1]-1e-5, rec, facecolor='k', alpha=0.1)
+# #
+# # ax.xaxis.grid()
+# # ax.legend(loc='lower left')
+# # plt.show()
+#
+# # --------------------------------------------------------------------------
+# # --- Estimation
+# # --------------------------------------------------------------------------
+#
+# # Observables: labor, consumption, investment
+# # Indexes: 14, 11, 10
+#
+# no = 3  # Number of observables
+#
+# observation_matrix =  tensor([
+#     [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.,
+#         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+#     [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.,
+#         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+#     [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0.,
+#         0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]], requires_grad = True)
+#
+# # observation_matrix = zeros((no, nx+ny+nz), requires_grad=True)
+# # observation_matrix[0,10] = observation_matrix[1,11] = observation_matrix[2,14] = 1
+#
+# observables = X_sim[(10,11,14), :]
+#
+# # Optimization
+#
+# from Loss_function_PyTorch import loss_function
+#
+# par = torch.rand(1, requires_grad=True)
+# learning_rate = 1e-5
+# n_iter = 50
+#
+# optimizer = torch.optim.SGD(params=[par], lr=learning_rate)
+#
+# # optimizer.zero_grad()
+# # loss = loss_function(par, observation_matrix, observables,  X_sim[:, 0])
+# # print(loss)
+# # loss.backward()
+# # optimizer.step()
+#
+# def closure():
+#     # Before the backward pass, use the optimizer object to zero all of the
+#     # gradients for the Tensors it will update (which are the learnable weights
+#     # of the model)
+#     optimizer.zero_grad()
+#
+#     # Without a constant term in the likelihood function:
+#
+#     loss_value = loss_function(par, observation_matrix, observables,  X_sim[:, 0])
+#
+#     # Backward pass: compute gradient of the loss with respect to model parameters
+#
+#     loss_value.backward(retain_graph=True)
+#
+#     return loss_value, par
+#
+# # Calling the step function on an Optimizer makes an update to its parameters
+#
+# loss_vector = torch.empty(n_iter)
+# par_vector = torch.empty(n_iter)
+#
+# for i in range(n_iter):
+#     print(i)
+#     optimizer.step(closure)
+#     loss_vector[i], par_vector[i] = closure()
+#
+# print(par_vector)
