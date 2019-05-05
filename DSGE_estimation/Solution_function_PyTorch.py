@@ -274,8 +274,8 @@ def Solution(betta = 0.99, tau = 0.025, alphaa = 0.3, psi = 1/0.169, gamma_p = 0
              cat((zeros((nz, nx)), zeros((nz, ny)), -eye((nz))), 1)), 0)
     C = cat((zeros((ny, nx + ny+nz)), cat((matrix_names[4], matrix_names[7], matrix_names[9]), 1), zeros((nz, nx+ny+nz))), 0)
 
-    with open('MatricesABC_values.pickle', 'wb') as f:
-        pickle.dump([A, B, C], f)
+    # with open('MatricesABC_values.pickle', 'wb') as f:
+    #     pickle.dump([A, B, C], f)
 
     F_iter, Q_iter = Linear_Time_Iteration(A, B, C, 1e-16, 1e-4)
 
