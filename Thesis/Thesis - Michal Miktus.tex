@@ -395,10 +395,10 @@ The profits of intermediate goods firms are paid as dividends $D_{t}$.
 
 In order to perform the maximization task, it uses a discount factor ($\beta^{k} \rho_{t +k}$) that is based on the fact that firms belong to households. From the Euler-equation of consumption, it holds:
 
-{\color{red} 
+
 \begin{align} \label{Euler for firm}
 \beta^{k} \rho_{t +k} = \beta^{k} \frac{\lambda_{t+k}}{\lambda_{t}P_{t+k}}
-\end{align} }
+\end{align} 
 
 Finally, the determination of prices also follows a Calvo-rule in order to model the nominal price rigidity. Each firm $j$ is allowed in period $t$ to peg its nominal price with probability $\varsigma_{p}$. Since firms are defined over a continuum between 0 and 1, prices that are updated in each period are $1-\varsigma_{p}$ and prices that are not updated amount to $\varsigma_{p}$. Prices of firms that was unable to re-set their prices are partially indexed by the past inflation rate $\Pi_{t-1}$:
 
@@ -707,7 +707,7 @@ Let $A$ be a squared $(n\times n)$ matrix with $n$ linearly independent columns,
 where $\Lambda$ is a diagonal matrix such that $\lambda_i =\Lambda_{ii}$ is the eigenvalue of $A$ associated to the eigenvector $q_i$ stored in column $i$ of the square $(n \times n)$ matrix $Q$.
 \end{theorem}
 
-The proofs for the following section can be found for instance in \cite{roman2008graduate} or \cite{brown1988second}.  
+The proofs for the following section can be found for instance in \citet{roman2008graduate} or \citet{brown1988second}.  
 
 \begin{theorem}[Generalized (complex) Schur decomposition or QZ decomposition]
 Let $A$ and $B$ be $n\times n$ matrices. Then there exist matrices $Q,Z,T$ and $S$ such that
@@ -837,7 +837,7 @@ The \citet{uhlig1998toolkit} algorithm uses generalized eigenvalue calculations 
 z' &= Nz + \varepsilon'
 \end{align}
 
-where $x$ are the endogenous state variables, $y$ the endogenous control (also called \textit{jump}) variables, while $z$ denotes the exogenous variables. Moreover, the apostrof stands for the leading operator.
+where $x$ are the endogenous state variables, $y$ the endogenous control (also called \textit{jump}) variables, while $z$ denotes the exogenous variables. Moreover, the apostrophe stands for the leading operator.
 
 Assuming that the decision rules can be expressed as:
 
@@ -925,7 +925,7 @@ Y' &= \begin{bmatrix}
 
 Finally, it has to be emphasised that the \citet{uhlig1998toolkit} and \citet{klein2000using} solutions are equivalent (\citet{bonaldi2010identification}).
 
-\subsection{Linear Time Iteration Procedure}
+\subsection{Linear Time Iteration procedure}
 
 \citet{uhlig1998toolkit} procedure provided the foundations for the techniques to solve a  \citet{smets2003estimated} model. Nevertheless, due to the implementation of non-differentiable QZ-algorithm, its usefulness for the machine learning frameworks exploiting the benefits of automatic differentiation is questionable. Therefore, the Linear Time Iteration Procedure of \cite{rendahl2017linear} is proposed as an alternative, yielding identical results to the \citet{uhlig1998toolkit} approach.
 
@@ -1001,17 +1001,104 @@ This is problematic when uncertainty does matter, not to mention the risk premiu
 
 \chapter{Estimation}
 
-Step 1: the linear rational expectations model is solved resulting in a state equation in the predetermined state variables.
+In the previous section the linear rational expectations model was solved by several different techniques, with the emphasis imposed on the Linear Time Iteration algorithm due to its differentiability, resulting in a state equation in the predetermined state variables. As the main interest of the paper is to implement the machine learning techniques to the DSGE model estimation, the formerly derived model should be written in the state space form, by adding a measurement equation linking the three observable variables (labor, consumption, investment) to the vector of state variables. Moreover, the likelihood function should be calculated using the Kalman filter, whose maximization leads to the parameters estimation.
 
-Step 2: the model is written in the state space form by adding a measurement equation linking the seven observable variables (output, consumption, investment, hours worked, real wages, prices, short-term interest rate) to the vector of state variables.
+The maximization of the likelihood function can be performed through standard optimization procedures such as L-BFGS (\citet{zhu1997algorithm}) or stochastic gradient descent (\citet{bottou2010large}), both of them involving the calculation of derivatives. In fact, derivatives, predominantly in the form of gradients and Hessians of the objective function, are omnipresent in machine learning (\citet{sra2011introduction}). Techniques for the computation of derivatives in programming languages can be classified into four main categories: (1) manually deriving derivatives and coding them; (2) numerical differentiation using finite difference approximations; (3) symbolic differentiation using expression manipulation in computer algebra systems such as Mathematica, Maxima, and Maple; (4) automatic differentiation (AD), also called algorithmic differentiation or autodiff, which is the fundamental subject of this dissertation. To be more precise, the machine learning methods of the paper consist of the automatic differentiation procedure, implemented during the maximization process, as well as the proper ecosystem of tensor computations such as PyTorch or TensorFlow. Both of them are described in the following sections.
 
-Step 3: the likelihood function in derived using the Kalman filter.
+\section{Automatic differentiation}
 
-Step 4: maximize the likelihood function.
+Manual differentiation is a tedious, time consuming and prone to error procedure, requiring a model to be defined as a closed-form expression, eliminating or severely confining algorithmic control flow and expressivity. Alternatively, numerical differentiation is straightforward to implement but can be highly inaccurate due to round-off and truncation errors (\citet{jerrell1997automatic}) and it is poorly scalable. On the other hand, symbolic differentiation addresses the weaknesses of both the manual and numerical methods, but often results in complex, cryptic and similarly to the manual technique closed-form expressions.
+
+The fourth technique, automatic differentiation, surmounts all of the above-mentioned obstacles, with its basic form consisting of applying symbolic differentiation at the elementary operation level and keeping intermediate numerical results, in lockstep with the evaluation of the main function (\citet{baydin2018automatic}). It can be shown that all numerical computations are ultimately compositions of a finite set of elementary operations for which derivatives are known (\citet{griewank2008evaluating}), such as the binary arithmetic operations, the unary sign switch and transcendental functions, not to mention the exponential, the logarithm or the trigonometric functions. What is more, combining the derivatives of the constituent operations through the chain rule gives the derivative of the overall composition.
+
+A substantial point to emphasis is that AD can differentiate not only closed-form expressions in the classical sense, but also algorithms using control flow such as branching, loops, recursion and procedure calls, giving it an important advantage over symbolic differentiation which markedly limits such expressivity. Recalling the looping structure of the Linear Time Iteration algorithm, the automatic differentiation seems like an indispensable tool for the maximization process.
+
+\subsection{Computational graph}
+
+The basic mathematical ideas behind AD have been around for a long time. However, interest in AD had definitely revived by 80s' due to improvements in programming techniques and the introduction of the efficient reverse mode. A useful tool in the development of AD following 1980 was the computational graph, which is a way of visualizing an algorithm or computer program different from formulas. For instance, Fig. \ref{Computational_graph} illustrates a computational graph, technically known as a directed acyclic graph (DAG). Transformations of the algorithm such as differentiation in forward or reverse mode can be thus expressed as modifications of the computational graph.
+
+\newpage
+
+\begin{figure}[H] \centering
+\includegraphics[scale=0.4]{Computational_graph}
+\caption[Computational graph]{Computational graph\footnotemark}
+\label{Computational_graph}
+\end{figure} 
+
+\footnotetext{Source: \citet{bucker2006automatic}}
+
+In simple terms, a computation graph is a DAG in which nodes represent variables (tensors, matrix, scalars, etc.) and edge represent some mathematical operations (for example, summation, multiplication). The computation graph has some leaf variables. The root variables of the graph are computed according to operations defined by the graph. During the optimization step, we combine the chain rule and the graph to compute the derivative of the output w.r.t the learnable variable in the graph and update these variables.
+
+There are two different modes of automatic differentiation, based on the application of the chain rule. The next section will start with forward mode automatic differentiation, which often is find a little more intuitive, described on the simple example.
+
+\subsection{Forward mode}
+
+Given a function $f$, one can construct a computational graph (a directed acyclic one) representing it, for instance let:
+
+\[ f(x,y) = \cos(x) \sin(y) + \dfrac{x}{y} \]
+
+Then each node of the graph represents a primitive function, while the edges represent the flow of information:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth,height=0.8\textheight,keepaspectratio]{Aut_diff}
+\caption[Forward propagation]{Forward propagation\footnotemark}
+\label{Forward_propagation}
+\end{figure}
+
+\footnotetext{Source: \url{http://www.columbia.edu/~ahd2125/post/2015/12/5/}}
+
+Forward differentiation works by recursively defining derivatives of nodes in terms of their parents. Suppose one wants to calculate the partial $\dfrac{\partial f}{\partial x}$, denoted by $Df$. Then:
+
+\begin{align*}
+& Df = Dw_{7} = D(w_{5} + w_{6}) = Dw_{5} + Dw_{6} \\
+& Dw_{6} = D\dfrac{w_{1}}{w_{2}} = \dfrac{w_{1}Dw_{2}- w_{2}Dw_{1}}{w_{2}^{2}}  \\
+& Dw_{5} = Dw_{3}w_{4} = w_{3}Dw_{4} + w_{4}Dw_{3} \\
+& Dw_{4} = D\sin(w_{2}) = \cos(w_{2}) Dw_{2} \\
+& Dw_{3} = D\cos(w_{1}) = -\sin(w_{1}) Dw_{1} \\
+& Dw_{2} = Dy \\
+& Dw_{1} = Dx 
+\end{align*}
+
+The final value of $Df$ depends only on $x, y, Dw_{1}, Dw_{2}$. In this case, $ D = \dfrac{\partial f}{\partial x}$, so $Dx = 1$ and $Dy = 0$. Because information flows in the same direction as when one evaluates the expression (bottom-up), it is called the \textit{forward mode}. Predictably, the information flows top-down in  \textit{backward mode}, also called \textit{reverse mode}.
+
+\subsection{Backward mode}
+
+Reverse mode automatic differentiation lets calculate gradients much more efficiently than forward mode automatic differentiation. Suppose one wants to calculate the gradient:
+
+\[ \triangledown f = \left<\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}\right> = \left<\frac{\partial w_{7}}{\partial w_{1}}, \frac{\partial w_{7}}{\partial w_{2}}\right> \]
+
+Then:
+
+\begin{align*}
+& \frac{\partial w_{7}}{\partial w_{1}} = \frac{\partial w_{3}}{\partial w_{1}} \frac{\partial w_{7}}{\partial w_{3}} + \frac{\partial w_{6}}{\partial w_{1}} \frac{\partial w_{7}}{\partial w_{6}} = -\sin w_{1} \frac{\partial w_{7}}{\partial w_{3}} + \frac{1}{w_{2}} \frac{\partial w_{7}}{\partial w_{6}} \\
+& \frac{\partial w_{7}}{\partial w_{2}} = \frac{\partial w_{4}}{\partial w_{2}} \frac{\partial w_{7}}{\partial w_{4}} + \frac{\partial w_{6}}{\partial w_{2}} \frac{\partial w_{7}}{\partial w_{6}} = \cos w_{2} \frac{\partial w_{7}}{\partial w_{4}} - \frac{w_{1}}{w_{2}^{2}} \frac{\partial w_{7}}{\partial w_{6}} \\
+& \frac{\partial w_{7}}{\partial w_{3}} = \frac{\partial w_{5}}{\partial w_{3}} \frac{\partial w_{7}}{\partial w_{5}} = w_{4} \frac{\partial w_{7}}{\partial w_{5}} \\
+& \frac{\partial w_{7}}{\partial w_{4}} = \frac{\partial w_{5}}{\partial w_{4}} \frac{\partial w_{7}}{\partial w_{5}} = w_{3} \frac{\partial w_{7}}{\partial w_{4}} \\
+& \frac{\partial w_{7}}{\partial w_{5}} = 1 \\
+& \frac{\partial w_{7}}{\partial w_{6}} = 1
+\end{align*}
+
+Instead of using the chain rule to find derivatives of parents in terms of derivatives of their children, one finds derivatives of children nodes in terms of their parents. Because information flows top-down, the reverse of normal evaluation, it is called the \textit{reverse mode} automatic differentiation.
+
+Notice that  all operations in reverse mode differentiation are scalar operations, even though one calculates the (vector) gradient. Computing gradients via reverse mode can be thus significantly faster if $f$ contains a vast number of input variables.
+
+\section{Tensor platform}
+
+PyTorch is a relatively new deep learning library which support dynamic computation graphs and tensors which can tap into the resources of a GPU to significantly speed up matrix operations. The dynamic graph paradigm allows to make changes to the model architecture during runtime, as a graph is created only when a piece of code is run. This means a graph may be redefined during the lifetime for a program. This, however, is not possible with static graphs, used by another popular deep learning libraryTensorFlow, where graphs are created before running the program, and merely executed later. 
+
+Finally, PyTorch has in-built several optimization algorithms, such as Stochastic Gradient Descent or ADAM, which solves the likelihood maximization problem relatively costlessly.
+
+\chapter{Results}
+
+Here go the results.
+
 
 \chapter{Concluding remarks} \label{Concluding remarks}
 
 Here goes the conclusion.
+
+Potential extensions: GPU acceleration, higher approximations
 
 \newpage
 
@@ -1073,13 +1160,13 @@ Define $W_{t}$ as the Lagrange multiplier, then the cost minimization becomes:
 L = \int\limits_{0}^{1} W_{t}^{\tau} l_{t}^{\tau} d\tau + W_{t} \left( L_{t} - \left[ \int\limits_{0}^{1} \left( l_{t}^{\tau} \right)^{\frac{1}{1+\lambda_{w,t}}} d\tau \right]^{1+\lambda_{w,t}} \right)
 \end{align}
 
-{\color{red} Taking the first order conditions:
+Taking the first order conditions:
 
 \begin{align} \label{Optimal demand function for labor}
 \frac{\partial L}{\partial l_{t}^{\tau}} &= W_{t}^{\tau} - W_{t} \left( \left( 1+\lambda_{w ,t} \right) \left[  \int\limits_{0}^{1} \left( l_{t}^{\tau} \right)^{\frac{1}{1+\lambda_{w ,t}}} d\tau \right]^{\lambda_{w ,t}} \frac{1}{1+\lambda_{w ,t}}  \left( l_{t}^{\tau} \right)^{\frac{-\lambda_{w ,t}}{1+\lambda_{w ,t}}} \right) = 0 \nonumber \\
 & \iff W_{t}^{\tau} = W_{t} L_{t}^{\frac{\lambda_{w ,t}}{1+\lambda_{w,t}}} \left( l_{t}^{\tau} \right)^{\frac{-\lambda_{w,t}}{1+\lambda_{w ,t}}} \nonumber \\
 & \iff l_{t}^{\tau}= L_{t} \left( \frac{W_{t}^{\tau}}{W_{t}}\right)^{\frac{-(1+\lambda_{w,t})}{\lambda_{w ,t}}}
-\end{align} }
+\end{align} 
 
 The derived optimal demand function of labor can be then substituted in the aggregate labor demand equation yielding:
 
@@ -1428,10 +1515,10 @@ K_{t-1} (1 - \tau) + I_{t} \left[ 1 - S \left(\frac{\varepsilon_{t}^{I}I_{t}}{I_
 
 Considering the steady state relationships:
 
-{\color{red}  \begin{align}
+\begin{align}
 &\hat{K}_{t}K = (1 - \tau)K \hat{K}_{t-1} + \hat{I}_{t}I = (1 - \tau)K \hat{K}_{t-1} + \hat{I}_{t}\tau K \nonumber \\
 & \Rightarrow \hat{K}_{t} = (1 - \tau) \hat{K}_{t-1} + \hat{I}_{t-1}\tau
-\end{align} }
+\end{align} 
 
 \section*{Log-linearised DSGE model - Prices}
 

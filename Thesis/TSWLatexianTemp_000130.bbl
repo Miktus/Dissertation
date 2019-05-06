@@ -1,0 +1,149 @@
+\begin{thebibliography}{22}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Adjemian et~al.(2011)Adjemian, Bastani, Juillard, Mihoubi, Perendia,
+  Ratto, and Villemot]{adjemian2011dynare}
+St{\'e}phane Adjemian, Houtan Bastani, Michel Juillard, Ferhat Mihoubi, George
+  Perendia, Marco Ratto, and S{\'e}bastien Villemot.
+\newblock Dynare: Reference manual, version 4.
+\newblock 2011.
+
+\bibitem[Baydin et~al.(2018)Baydin, Pearlmutter, Radul, and
+  Siskind]{baydin2018automatic}
+Atilim~Gunes Baydin, Barak~A Pearlmutter, Alexey~Andreyevich Radul, and
+  Jeffrey~Mark Siskind.
+\newblock Automatic differentiation in machine learning: a survey.
+\newblock \emph{Journal of Marchine Learning Research}, 18:\penalty0 1--43,
+  2018.
+
+\bibitem[Blanchard and Kahn(1980)]{blanchard1980solution}
+Olivier~Jean Blanchard and Charles~M Kahn.
+\newblock The solution of linear difference models under rational expectations.
+\newblock \emph{Econometrica: Journal of the Econometric Society}, pages
+  1305--1311, 1980.
+
+\bibitem[Bonaldi et~al.(2010)]{bonaldi2010identification}
+Pietro Bonaldi et~al.
+\newblock \emph{Identification problems in the solution of linearized DSGE
+  models}.
+\newblock Citeseer, 2010.
+
+\bibitem[Bottou(2010)]{bottou2010large}
+L{\'e}on Bottou.
+\newblock Large-scale machine learning with stochastic gradient descent.
+\newblock In \emph{Proceedings of COMPSTAT'2010}, pages 177--186. Springer,
+  2010.
+
+\bibitem[Brown(1988)]{brown1988second}
+William~Clough Brown.
+\newblock \emph{A second course in linear algebra}.
+\newblock Wiley-Interscience, 1988.
+
+\bibitem[B{\"u}cker et~al.(2006)B{\"u}cker, Corliss, Hovland, Naumann, and
+  Norris]{bucker2006automatic}
+H~Martin B{\"u}cker, George Corliss, Paul Hovland, Uwe Naumann, and Boyana
+  Norris.
+\newblock \emph{Automatic differentiation: applications, theory, and
+  implementations}, volume~50.
+\newblock Springer Science \& Business Media, 2006.
+
+\bibitem[Christiano et~al.(2005)Christiano, Eichenbaum, and
+  Evans]{christiano2005nominal}
+Lawrence~J Christiano, Martin Eichenbaum, and Charles~L Evans.
+\newblock Nominal rigidities and the dynamic effects of a shock to monetary
+  policy.
+\newblock \emph{{Journal of Political Economy}}, 113\penalty0 (1):\penalty0
+  1--45, 2005.
+
+\bibitem[Gomme and Klein(2011)]{gomme2011second}
+Paul Gomme and Paul Klein.
+\newblock Second-order approximation of dynamic models without the use of
+  tensors.
+\newblock \emph{Journal of Economic Dynamics and Control}, 35\penalty0
+  (4):\penalty0 604--615, 2011.
+
+\bibitem[Griewank and Walther(2008)]{griewank2008evaluating}
+Andreas Griewank and Andrea Walther.
+\newblock \emph{Evaluating derivatives: principles and techniques of
+  algorithmic differentiation}, volume 105.
+\newblock Siam, 2008.
+
+\bibitem[Jerrell(1997)]{jerrell1997automatic}
+Max~E Jerrell.
+\newblock Automatic differentiation and interval arithmetic for estimation of
+  disequilibrium models.
+\newblock \emph{Computational Economics}, 10\penalty0 (3):\penalty0 295--316,
+  1997.
+
+\bibitem[Klein(2000)]{klein2000using}
+Paul Klein.
+\newblock Using the generalized schur form to solve a multivariate linear
+  rational expectations model.
+\newblock \emph{Journal of economic dynamics and control}, 24\penalty0
+  (10):\penalty0 1405--1423, 2000.
+
+\bibitem[Rendahl(2017)]{rendahl2017linear}
+Pontus Rendahl.
+\newblock Linear time iteration.
+\newblock 2017.
+
+\bibitem[Roman(2008)]{roman2008graduate}
+Steven Roman.
+\newblock Graduate texts in mathematics, advanced linear algebra, 2008.
+
+\bibitem[Schmitt-Groh{\'e} and Uribe(2004)]{schmitt2004solving}
+Stephanie Schmitt-Groh{\'e} and Mart{\i}n Uribe.
+\newblock Solving dynamic general equilibrium models using a second-order
+  approximation to the policy function.
+\newblock \emph{Journal of economic dynamics and control}, 28\penalty0
+  (4):\penalty0 755--775, 2004.
+
+\bibitem[Sims(2002)]{sims2002solving}
+Christopher~A Sims.
+\newblock Solving linear rational expectations models.
+\newblock \emph{Computational economics}, 20\penalty0 (1):\penalty0 1--20,
+  2002.
+
+\bibitem[Smets and Wouters(2003)]{smets2003estimated}
+Frank Smets and Rafael Wouters.
+\newblock {An estimated Dynamic Stochastic General Equilibrium model of the
+  euro area}.
+\newblock \emph{{Journal of the European Economic Association}}, 1\penalty0
+  (5):\penalty0 1123--1175, 2003.
+
+\bibitem[Smets and Wouters(2007)]{smets2007shocks}
+Frank Smets and Rafael Wouters.
+\newblock {Shocks and frictions in US business cycles: A Bayesian DSGE
+  approach}.
+\newblock \emph{{American Economic Review}}, 97\penalty0 (3):\penalty0
+  586--606, 2007.
+
+\bibitem[Sra et~al.(2011)Sra, Nowozin, and Wright]{sra2011introduction}
+Suvrit Sra, Sebastien Nowozin, and Stephen~J Wright.
+\newblock Introduction: optimization and machine learning.
+\newblock In \emph{Optimization for Machine Learning}, pages 1--17. MIT Press,
+  2011.
+
+\bibitem[Uhlig et~al.(1998)]{uhlig1998toolkit}
+Harald Uhlig et~al.
+\newblock A toolkit for analysing nonlinear dynamic stochastic models easily.
+\newblock \emph{QM\&RBC Codes}, 1998.
+
+\bibitem[Villemot et~al.(2011)]{villemot2011solving}
+S{\'e}bastien Villemot et~al.
+\newblock Solving rational expectations models at first order: what dynare
+  does.
+\newblock Technical report, Citeseer, 2011.
+
+\bibitem[Zhu et~al.(1997)Zhu, Byrd, Lu, and Nocedal]{zhu1997algorithm}
+Ciyou Zhu, Richard~H Byrd, Peihuang Lu, and Jorge Nocedal.
+\newblock Algorithm 778: L-bfgs-b: Fortran subroutines for large-scale
+  bound-constrained optimization.
+\newblock \emph{ACM Transactions on Mathematical Software (TOMS)}, 23\penalty0
+  (4):\penalty0 550--560, 1997.
+
+\end{thebibliography}
