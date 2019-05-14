@@ -5,6 +5,14 @@
 ### Project specific ###
 
 Dynare/SmetsWouters_simul
+DSGE_estimation/.idea/*
+DSGE_estimation/Results/*
+
+
+### Python specific ###
+
+__pycache__
+*.pyc
 
 ### macOS ###
 # General
