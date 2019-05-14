@@ -118,7 +118,7 @@ Paris School of Economics
   14.3 Economics\par
   \vspace*{26pt}%
   \begin{center}%
-    \bfseries\large Subject classification
+    \bfseries\large 
     \@endparpenalty\@M
   \end{center}
  \par

@@ -6,24 +6,28 @@
 
 # Import libraries
 
-import matplotlib.pyplot as plt
-import seaborn as sn
-
-import numpy as np
-import pandas as pd
 import torch
-from pandas_datareader.data import DataReader
-from torch import tensor, zeros, mm, randn, normal, cat, squeeze, unsqueeze
+import time
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from torch import tensor, zeros, mm, randn, normal, cat, squeeze, unsqueeze, max, argmax
+from torch.distributions import uniform
+from SGD_with_Hessian import SGD_with_Hessian
+from Loss_function_PyTorch import loss_function
 from Solution_function_PyTorch import Solution
-
-
-# %matplotlib inline
 
 # Set printing options
 
 np.set_printoptions(precision=3, suppress=True, linewidth=120)
 torch.set_printoptions(precision=3, linewidth=120)
 pd.set_option('float_format', lambda x: '%.3g' % x, )
+sns.set()
+
+# Declare path
+
+path = "/Users/miktus/Documents/PSE/Dissertation/DSGE_estimation"
 
 # --------------------------------------------------------------------------
 # -- Define the model
@@ -71,7 +75,7 @@ variables = pd.DataFrame({
 
 var_endo_states = variables.loc[variables['types'] == 'X']
 var_endo_controls = variables.loc[variables['types'] == 'Y']
-var_exo  = variables.loc[variables['types'] == 'Z']
+var_exo = variables.loc[variables['types'] == 'Z']
 
 #    EQUATIONS   [N,3] cell array: Equation type ~ Equation name ~ equation
 #                Equation type: 'D' ... Deterministic equation
@@ -135,188 +139,192 @@ equations = pd.DataFrame({
 # --- Setting parameters
 # --------------------------------------------------------------------------
 
-betta = tensor(0.99, requires_grad = True)
-tau = tensor(0.025, requires_grad = True)
-alphaa = tensor(0.3, requires_grad = True)
-psi = tensor(1/0.169, requires_grad = True)
-gamma_p = tensor(0.469, requires_grad = True)
-gamma_w = tensor(0.763, requires_grad = True)
-lambda_w = tensor(0.5, requires_grad = True)
-xi_p = tensor(0.908, requires_grad = True)
-xi_w = tensor(0.737, requires_grad = True)
-sigma_L = tensor(2.4, requires_grad = True)
-sigma_c = tensor(1.353, requires_grad = True)
-h = tensor(0.573, requires_grad = True)
-phi = tensor(1.408, requires_grad = True)
-adj = tensor(1/6.771, requires_grad = True)
+betta = tensor(0.95, requires_grad=True)
+tau = tensor(0.025, requires_grad=True)
+alphaa = tensor(0.3, requires_grad=True)
+psi = tensor(1/0.169, requires_grad=True)
+gamma_p = tensor(0.469, requires_grad=True)
+gamma_w = tensor(0.763, requires_grad=True)
+lambda_w = tensor(0.5, requires_grad=True)
+xi_p = tensor(0.908, requires_grad=True)
+xi_w = tensor(0.737, requires_grad=True)
+sigma_L = tensor(2.4, requires_grad=True)
+sigma_c = tensor(1.353, requires_grad=True)
+h = tensor(0.573, requires_grad=True)
+phi = tensor(1.408, requires_grad=True)
+adj = tensor(1/6.771, requires_grad=True)
 r_k = (1/betta)-1+tau
-k = tensor(8.8, requires_grad = True)
-g = tensor(0.18, requires_grad = True)
-r_dpi = tensor(0.14, requires_grad = True)
-r_Y = tensor(0.099, requires_grad = True)
-r_dY = tensor(0.159, requires_grad = True)
-rho = tensor(0.961, requires_grad = True)
-r_pi = tensor(1.684, requires_grad = True)
+k = tensor(8.8, requires_grad=True)
+g = tensor(0.18, requires_grad=True)
+r_dpi = tensor(0.14, requires_grad=True)
+r_Y = tensor(0.099, requires_grad=True)
+r_dY = tensor(0.159, requires_grad=True)
+rho = tensor(0.961, requires_grad=True)
+r_pi = tensor(1.684, requires_grad=True)
 
-rho_L = tensor(0.889, requires_grad = True)
-rho_a = tensor(0.823, requires_grad = True)
-rho_b = tensor(0.855, requires_grad = True)
-rho_G = tensor(0.949, requires_grad = True)
-rho_pi = tensor(0.924, requires_grad = True)
-rho_I = tensor(0.927, requires_grad = True)
+rho_L = tensor(0.889, requires_grad=True)
+rho_a = tensor(0.823, requires_grad=True)
+rho_b = tensor(0.855, requires_grad=True)
+rho_G = tensor(0.949, requires_grad=True)
+rho_pi = tensor(0.924, requires_grad=True)
+rho_I = tensor(0.927, requires_grad=True)
 
-sd_R = tensor(0.081, requires_grad = True)
-sd_p = tensor(0.16, requires_grad = True)
-sd_w = tensor(0.289, requires_grad = True)
-sd_Q = tensor(0.604, requires_grad = True)
+sd_R = tensor(0.081, requires_grad=True)
+sd_p = tensor(0.16, requires_grad=True)
+sd_w = tensor(0.289, requires_grad=True)
+sd_Q = tensor(0.604, requires_grad=True)
 
 # --------------------------------------------------------------------------
 # --- Solution
 # --------------------------------------------------------------------------
 
-F, Q, nx, ny, nz = Solution(betta = betta, tau = tau, alphaa = alphaa, psi = psi, gamma_p = gamma_p,
-             gamma_w = gamma_w, lambda_w = lambda_w, xi_p = xi_p, xi_w = xi_w, sigma_L = sigma_L,
-             sigma_c = sigma_c, h = h, phi = phi, adj = adj, k = k, g = g, r_dpi = r_dpi, r_Y = r_Y,
-             r_dY = r_dY, rho = rho, r_pi = r_pi, rho_L = rho_L, rho_a = rho_a, rho_b = rho_b, rho_G = rho_G,
-             rho_pi = rho_pi, rho_I = rho_I, sd_R = sd_R, sd_p = sd_p, sd_w = sd_w, sd_Q = sd_Q)
+F, Q, nx, ny, nz = Solution(F_initial=zeros((31, 31)), betta=betta, tau=tau, alphaa=alphaa, psi=psi, gamma_p=gamma_p,
+                            gamma_w=gamma_w, lambda_w=lambda_w, xi_p=xi_p, xi_w=xi_w, sigma_L=sigma_L,
+                            sigma_c=sigma_c, h=h, phi=phi, adj=adj, k=k, g=g, r_dpi=r_dpi, r_Y=r_Y,
+                            r_dY=r_dY, rho=rho, r_pi=r_pi, rho_L=rho_L, rho_a=rho_a, rho_b=rho_b, rho_G=rho_G,
+                            rho_pi=rho_pi, rho_I=rho_I, sd_R=sd_R, sd_p=sd_p, sd_w=sd_w, sd_Q=sd_Q)
 
 # --------------------------------------------------------------------------
-# --- Simulation
+# --- Monte Carlo design
 # --------------------------------------------------------------------------
 
-T = 1000  # Number of periods to simulate
+monte_carlo_iter = 1
+par_monte = zeros(monte_carlo_iter)
+loss_monte = zeros(monte_carlo_iter)
+standard_error_monte = zeros(monte_carlo_iter)
 
-epsilon = tensor([normal(mean = 0, std = sd_Q), normal(mean = 0, std = sd_p), normal(mean = 0, std = sd_w),
-                  normal(mean = 0, std = sd_R)])
-epsilon = cat((randn(6), epsilon))
-epsilon = cat((zeros((nx+ny)), epsilon))
+for iter in range(monte_carlo_iter):
 
-X_sim = zeros((nx+ny+nz, T))
-X_sim[:, 0] = squeeze(mm(Q, torch.t(unsqueeze(epsilon, 0))))
+    start_time = time.time()
 
-for t in range(1, T):
-    epsilon = tensor([normal(mean=0, std=sd_Q),
-                        normal(mean=0, std=sd_p), normal(mean=0, std=sd_w),
-                        normal(mean=0, std=sd_R)])
+    print("Number of Monte Carlo experiment: " + str(iter))
+
+    # --------------------------------------------------------------------------
+    # --- Simulation
+    # --------------------------------------------------------------------------
+
+    T = 300  # Number of periods to simulate
+
+    epsilon = tensor([normal(mean=0, std=sd_Q), normal(mean=0, std=sd_p), normal(mean=0, std=sd_w),
+                      normal(mean=0, std=sd_R)])
     epsilon = cat((randn(6), epsilon))
-    epsilon = cat((zeros((nx + ny)), epsilon))
-    X_sim[:, t] = squeeze(mm(F, torch.t(unsqueeze(X_sim[:, t-1].clone(), 0))) + mm(Q, torch.t(unsqueeze(epsilon, 0))))
 
-# Plot for consumption
+    X_sim = zeros((nx+ny+nz, T))
+    X_sim[:, 0] = squeeze(mm(Q, torch.t(unsqueeze(epsilon, 0))))
 
-# plt.plot(X_sim[11,:].detach().numpy())
-# plt.show()
+    for t in range(1, T):
+        epsilon = tensor([normal(mean=0, std=sd_Q),
+                          normal(mean=0, std=sd_p), normal(mean=0, std=sd_w),
+                          normal(mean=0, std=sd_R)])
+        epsilon = cat((randn(6), epsilon))
+        X_sim[:, t] = squeeze(mm(F, torch.t(unsqueeze(X_sim[:, t-1].clone(), 0))) + mm(Q, torch.t(unsqueeze(epsilon, 0))))
 
+    # Discard first 100 observations
 
-# --------------------------------------------------------------------------
-# --- Estimation on real data (TO BE DONE)
-# --------------------------------------------------------------------------
-# Get some data
-# start='1984-01'
-# end = '2015-01'
-# labor = DataReader('HOANBS', 'fred', start=start, end=end)        # hours
-# consumption = DataReader('PCECC96', 'fred', start=start, end=end) # billions of dollars
-# investment = DataReader('GPDI', 'fred', start=start, end=end)     # billions of dollars
-# population = DataReader('CNP16OV', 'fred', start=start, end=end)  # thousands of persons
-# recessions = DataReader('USRECQ', 'fred', start=start, end=end)
-#
-# # Collect the raw values
-# raw = pd.concat((labor, consumption, investment, population.resample('QS').mean()), axis=1)
-# raw.columns = ['labor', 'consumption', 'investment', 'population']
-# raw['output'] = raw['consumption'] + raw['investment']
-#
-# # Make the data consistent with the model
-# y = np.log(raw.output * 10**(9-3) / raw.population)
-# n = np.log(raw.labor * (1e3 * 40) / raw.population)
-# c = np.log(raw.consumption * 10**(9-3) / raw.population)
-#
-# # Make the data stationary
-# y = y.diff()[1:]
-# n = n.diff()[1:]
-# c = c.diff()[1:]
-#
-# # Construct the final dataset
-# econ_observed = pd.concat((y, n, c), axis=1)
-# econ_observed.columns = ['output','labor','consumption']
-#
-# fig, ax = plt.subplots(figsize=(13,4))
-#
-# dates = econ_observed.index._mpl_repr()
-#
-# ax.plot(dates, econ_observed.output, label='Output')
-# ax.plot(dates, econ_observed.labor, label='Labor')
-# ax.plot(dates, econ_observed.consumption, label='Consumption')
-#
-# rec = recessions.resample('QS').last().loc[econ_observed.index[0]:].iloc[:, 0].values
-# ylim = ax.get_ylim()
-# ax.fill_between(dates, ylim[0]+1e-5, ylim[1]-1e-5, rec, facecolor='k', alpha=0.1)
-#
-# ax.xaxis.grid()
-# ax.legend(loc='lower left')
-# plt.show()
+    X_sim_discarded = X_sim[:, 100:]
 
-# --------------------------------------------------------------------------
-# --- Estimation
-# --------------------------------------------------------------------------
+    # Plot for consumption
 
-# Observables: labor, consumption, investment
-# Indexes: 14, 11, 10
+    # plt.plot(X_sim[11,:].detach().numpy())
+    # plt.show()
 
-no = 3  # Number of observables
+    # --------------------------------------------------------------------------
+    # --- Estimation
+    # --------------------------------------------------------------------------
 
-observation_matrix =  tensor([
-    [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.,
-        0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
-    [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.,
-        0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
-    [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0.,
-        0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]], requires_grad = True)
+    # Observables: investment, consumption, labor
+    # Indexes: 10, 11, 14
 
-# observation_matrix = zeros((no, nx+ny+nz), requires_grad=True)
-# observation_matrix[0,10] = observation_matrix[1,11] = observation_matrix[2,14] = 1
+    no = 3  # Number of observables
 
-observables = X_sim[(10,11,14), :]
+    observation_matrix = tensor([
+        [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.,
+            0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+        [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.,
+            0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+        [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0.,
+            0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]], requires_grad=True)
 
-# Optimization
+    observables = X_sim_discarded[(10, 11, 14), :]
 
-from Loss_function_PyTorch import loss_function
+    # Plot likelihood function depending on one specific parameter value, eq. beta
 
-par = torch.rand(1, requires_grad=True)
-learning_rate = 1e-5
-n_iter = 50
+    plot = False
 
-optimizer = torch.optim.SGD(params=[par], lr=learning_rate)
+    if plot:
+        beta_to_graph = torch.arange(start=0., end=1.01, step=0.001, requires_grad=True)
+        likelihood_to_graph = []
+        likelihood_to_graph = [loss_function(beta, F, observation_matrix, observables, X_sim_discarded[:, 0]) for beta in beta_to_graph]
 
-# optimizer.zero_grad()
-# loss = loss_function(par, observation_matrix, observables,  X_sim[:, 0])
-# print(loss)
-# loss.backward()
-# optimizer.step()
+        plt.plot(beta_to_graph.detach().numpy(), likelihood_to_graph, color='blue')
+        plt.xlabel('Beta')
+        plt.ylabel('Likelihood')
+        plt.title('Likelihood depending on beta')
+        # plt.show()
+        plt.savefig(path + '/Graphs/Likelihood depending on beta.pdf')
 
-def closure():
-    # Before the backward pass, use the optimizer object to zero all of the
-    # gradients for the Tensors it will update (which are the learnable weights
-    # of the model)
-    optimizer.zero_grad()
+    # Optimization
 
-    # Without a constant term in the likelihood function:
+    optimization = True
 
-    loss_value = loss_function(par, observation_matrix, observables,  X_sim[:, 0])
+    if optimization:
 
-    # Backward pass: compute gradient of the loss with respect to model parameters
+        number_of_tries = 1
+        par_final = zeros(number_of_tries)
+        loss_final = zeros(number_of_tries)
+        standard_error_unscaled_final = zeros(number_of_tries)
 
-    loss_value.backward(retain_graph=True)
+        for j in range(number_of_tries):
 
-    return loss_value, par
+            print("The try number: " + str(j))
 
-# Calling the step function on an Optimizer makes an update to its parameters
+            distribution = uniform.Uniform(torch.Tensor([1]), torch.Tensor([10.0]))
+            par = distribution.sample(torch.Size([1, 1])).requires_grad_()
 
-loss_vector = torch.empty(n_iter)
-par_vector = torch.empty(n_iter)
+            learning_rate = 1e-8
+            n_iter = 100
 
-for i in range(n_iter):
-    print(i)
-    optimizer.step(closure)
-    loss_vector[i], par_vector[i] = closure()
+            optimizer = SGD_with_Hessian(params=[par], lr=learning_rate)
 
-print(par_vector)
+            def closure():
+
+                # Before the backward pass, use the optimizer object to zero all of the
+                # gradients for the Tensors it will update (which are the learnable weights
+                # of the model)
+                optimizer.zero_grad()
+
+                loss_value = loss_function(par, F, observation_matrix, observables, X_sim_discarded[:, 0])
+
+                # Backward pass: compute gradient of the loss with respect to model parameters
+
+                loss_value.backward(retain_graph=True)
+
+                return loss_value
+
+            # Calling the step function on an Optimizer makes an update to its parameters
+
+            for i in range(n_iter):
+                print("Optimization step number: " + str(i))
+
+                par_vector, loss_vector, standard_error_unscaled = optimizer.step(closure)
+
+            par_final[j] = par_vector
+            loss_final[j] = loss_vector
+            standard_error_unscaled_final[j] = standard_error_unscaled
+
+        loss_monte[iter] = max(loss_final)
+        index = argmax(loss_final)
+        par_monte[iter] = par_final[index]
+        standard_error_monte[iter] = standard_error_unscaled_final[index]/(T-100)
+
+        final = pd.DataFrame({
+            'Beta': par_monte.detach().numpy()**2/(1+par_monte.detach().numpy()**2),
+            'Likelihood': loss_monte.detach().numpy(),
+            'Standard error': standard_error_monte.detach().numpy()
+        })
+
+        # Export to csv
+
+        # final.to_csv(path + "/Results/MC_Beta_F_100_100.csv", index=False)
+
+        print("--- %s seconds ---" % (time.time() - start_time))

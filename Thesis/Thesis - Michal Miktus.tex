@@ -35,6 +35,7 @@
 \usepackage[round]{natbib}
 \bibliographystyle{plainnat}
 \usepackage{nameref}
+\usepackage{tabularx}
 
 \hypersetup{pdfstartview={XYZ null null 1.00}}
 
@@ -46,9 +47,39 @@
 }
 
 \numberwithin{equation}{section}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\newcolumntype{L}{>{\centering\arraybackslash}m{1.2cm}}
+\newcolumntype{M}{>{\centering\arraybackslash}m{2.8cm}}
 
 \lstset{ %
   language=MATLAB,                     % the language of the code
+  basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+  numbers=left,                   % where to put the line-numbers
+  numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
+  stepnumber=1,                   % the step between two line-numbers. If it's 1, each line
+                                  % will be numbered
+  numbersep=5pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  frame=single,                   % adds a frame around the code
+  rulecolor=\color{black},        % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  captionpos=b,                   % sets the caption-position to bottom
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                 % show the filename of files included with \lstinputlisting;
+                                  % also try caption instead of title
+  keywordstyle=\color{blue},      % keyword style
+  commentstyle=\color{ForestGreen},   % comment style
+  stringstyle=\color{Orchid},      % string literal style
+  escapeinside={\%*}{*)},         % if you want to add a comment within your code
+  morekeywords={*,...}            % if you want to add more keywords to the set
+} 
+
+\lstset{ %
+  language=python,                     % the language of the code
   basicstyle=\footnotesize,       % the size of the fonts that are used for the code
   numbers=left,                   % where to put the line-numbers
   numberstyle=\tiny\color{gray},  % the style that is used for the line-numbers
@@ -129,7 +160,7 @@ to DSGE estimation}
 \end{titlepage}
     
 \begin{abstract}
-Here goes the abstract. \\
+The estimation of Dynamic Stochastic General Equilibrium (DSGE) models through the Maximum Likelihood has a relatively protracted history. Elseways, the Machine Learning (ML) frameworks recently, yet profoundly entered the economics field. The following paper attempts to implement the advanced achievements of ML, not to mention the Automatic Differentiation (AD) or Stochastic Gradient Descent (SGD), to the Maximum Likelihood estimation of renowned \citet{smets2003estimated} DSGE model. The author identifies that the proposed framework can be considered as a valuable alternative to the Bayesian interference in case of highly-dimensional space parameter estimation.
 \end{abstract}
 
 \tableofcontents
@@ -141,17 +172,141 @@ Here goes the abstract. \\
 \chapter*{Introduction} \label{Introduction}
 \addcontentsline{toc}{chapter}{Introduction}
 
-Here goes the introduction. \\
+Machine learning is an application of artificial intelligence (AI) that provides systems the capability to automatically lucubrate and progress from experience without being explicitly programmed. It concentrates on the development of computer programs being able to access data and then use it in their learning process. In the last decade, machine learning frameworks made the vast progress in plethora of fields, gradually entering into the economics applications as well (\citet{mullainathan2017machine}). 
+
+On contrary, Dynamic Stochastic General Equilibrium (DSGE) models have become a standard tool in macroeconomics studies. Their attractiveness arises from the explicit specification of the objectives and constraints faced by households and firms, further employed in determination of the prices and allocations that emerge from their market interaction in an uncertain environment. Until recently, the calibration was the most common concept in the literature to explore the empirical properties of DSGE models. To be more specific, the calibration consists of fixing the structural parameters values to those estimated in preceding studies or those calculated using long-run averages of aggregate data. 
+
+In spite of the fact that the calibration is an appreciated utensil for understanding the dynamic properties of DSGE models, there is a plethora of advantages in their fully-fledged econometric estimation. To begin with, parameter estimates are obtained by imposing the restrictions of the model on the data, therefore they can overcome the inconsistency of DSGE assumptions with the calibration assumptions from the micro studies. Furthermore, the econometric estimation of the DSGE model permits to obtain estimates of parameters that may be difficult or even impossible to calculate from disaggregated data. Additionally, bootstrap techniques can be incorporated explicitly in impulse-response analysis, allowing to construct confidence intervals for the model’s response to a shock, thus integrating the parameter uncertainty. Finally, classic tools of model selection and evaluation can be promptly enforced.
+
+The Maximum Likelihood estimation procedure is relatively standard and its asymptotic properties are well known. Moreover, there are several studies implementing the aforementioned framework to the DSGE estimation, not to mention \citet{ruge2007methods} or \citet{andreasen2010maximize}. The main contribution of the following paper is to capitalize the recent advancements in the machine learning field in order to enhance the Maximum Likelihood estimation, not to mention the tensor platforms in the form of deep-learning libraries, exploiting the Automatic Differentiation advantages.
+
+Performed Monte Carlo analysis clearly indicates that the proposed framework can be deliberated as a profitable substitute to the Bayesian interference in case of highly-dimensional space parameter estimation. On the other hand, the implemented algorithms are surprisingly costly, in both time and memory allocation, in the case of solitary parameter estimation.
+
+The paper is organized as follows, Chapter 1 exhaustively describes the machine learning, while the next one illustrates the DSGE model that will serve as backdrop for the estimation procedures.. Next section characterizes the solution techniques, while estimation procedures and their application to DSGE models are outlined in chapter 4. Section 5 presents the Monte Carlo design and report its results. The dissertation is completed with the concluding remarks with potential extensions, references and appendices with codes in Dynare and Python.
+
+\chapter{Machine learning} \label{MachineLearning}
+
+Machine learning (ML) permits to perform analysis of tremendous quantities of data. Moreover, it generally delivers faster and more accurate results, simultaneously requiring additional time and resources to be trained accurately. Hence, based on the assessment of its early contributions to economics, it is predicted to have a dramatic impact on the social sciences field within a foreseeable future (\citet{athey2018impact}). In the following section the definition of machine learning is granted, with a brief description of its main strengths, as well as fundamental weaknesses, contrasting them with traditional and widely implemented econometric and statistical tools. In addition, the automatic differentiation procedure is thoroughly expounded, with the emphasis imposed on its contributions to the ML optimization methods, further augmented with two elementary illustrations of forward and backward automatic differentiation techniques. Finally, as the ML framework requires a proper ecosystem of tensor computations such as PyTorch or TensorFlow, both of the above-mentioned deep learning platforms are briefly explained.
+
+\section{Definition}
+
+It has to be underlined at the beginning that it does not exist single and generally acceptable definition of machine learning. In the broad understanding, it refers to a collections of subfields of computer science, as well as a set of topics developed and used across computer science, engineering, statistics, and increasingly the social sciences. In the aforementioned meaning, ML is an application of artificial intelligence (AI) that provides systems able to automatically peruse and progress from experience without being explicitly programmed. On contrary, conferring to the narrower definition, machine learning is a field that develops algorithms designed to be applied to datasets, with the main areas of focus being optimization,  prediction in both regression and classification instances, and clustering or grouping tasks.
+
+Furthermore, machine learning tasks can be classified into several broad categories. As far as the supervised learning is concerned, the algorithm constructs a mathematical model from a data containing both the inputs and the desired outputs. Oppositely, in unsupervised learning, a mathematical model is built from a set of data which encloses only inputs, without any output labels. In other words, it involves finding clusters of observations that are similar in terms of their covariates and thus can be viewed as \textit{dimensionality reduction}. In addition, semi-supervised learning algorithms lay in-between and develop mathematical models from incomplete training data, where a chunk of the sample input lacks labels. What is more, the reinforcement machine learning algorithms interact with its environment by producing actions and discover errors or rewards, automatically determining the ideal behavior within a specific context in order to maximize its performance. Finally, the main study of the following paper is the last wide ML application: the optimization.
+
+Machine learning intimate ties to optimization: many learning problems are formulated as minimization of some loss function on a training set of examples, which in turn expresses the divergence between the predictions of the trained model and the actual problem instances. Although it is true that machine learning optimization is a subset of optimization, there are some differences between classical optimization and machine learning (\citet{goodfellow2016deep}). Namely, in most machine learning scenarios, the main concern is imposed on some performance measure, defined with respect to the test set and possibly intractable. In order to optimize it, a different cost function is introduced and then minimized, expecting that it will lead to the performance measure improvement.This stays in contrast to pure optimization, where minimizing a cost function is a goal in and of itself.
+
+\section{Characteristics}
+
+Machine learning and econometrics share purpose and a philosophical underpinning, incorporating data and background knowledge to induce new expertise. Such new, inferred proficiency can specify \textit{in-sample} data generalizations (referred to as description or identification) or forecast and extrapolate into \textit{out-of-sample} data generalizations, such as patterns or trends. To infer sound generalizations out of data both seek statistical support in the statistics body of knowledge, mainly statistic inference theory. Thus both are subject to bias, both are prone to overfitting, both suffer equally from bad quality input data. Therefore, data cleaning and preparation is essential for both to produce useful, actionable insights.
+
+What distinguishes them is mainly scope. Econometric body of knowledge was developed and fitted to address economic (financial) data and questions. Machine learning is broader and from on-set has no commitment or attachment to any particular field of application. Hence, econometrics tends to incorporate more easily economic background knowledge, vide semi- and structured models, whereby economy theory (or expertise, or intuition) is explicitly represented and taken into account to estimate and to forecast.
+
+On the other hand, most machine learning techniques, in particular, the most used and successful ones, cannot cater for background knowledge as swiftly and as neatly. In fact, background knowledge is more incorporated in the data preparation phase, as well as in heuristics and in technique specific parametrization such as structural topology, thresholds or pruning decisions.
+
+Finally, it is necessary to emphasis one particular gain for economic modeling and analysis that hails from machine learning application: a whole infrastructure to account for highly non-linear relationships. On the other hand, the conundrum between correlation and causation is more effectively unraveled in the econometric field (\citet{boelaert2018great}).
+
+Before proceeding, it is useful to highlight two other contributions of the ML literature. The first one is computational rather than conceptual, but it has had such a large impact that it merits a short discussion. The technique is called stochastic gradient descent (SGD, \citet{bottou2010large}) and it meticulously explained in the chapter \ref{Estimation}. The second benefaction, the automatic differentiation, is the topic of the next section.
+
+\section{Automatic differentiation}
+
+The maximization of the likelihood function can be performed through standard optimization procedures such as L-BFGS (\citet{zhu1997algorithm}) or stochastic gradient descent (\citet{bottou2010large}), both of them involving the calculation of derivatives. In fact, derivatives, predominantly in the form of gradients and Hessians of the objective function, are omnipresent in machine learning (\citet{sra2011introduction}). Techniques for the computation of derivatives in programming languages can be classified into four main categories: (1) manually deriving derivatives and coding them; (2) numerical differentiation using finite difference approximations; (3) symbolic differentiation encompassing the expression manipulation in specifically designed computer algebra systems such as Mathematica, Maxima, and Maple; (4) automatic differentiation (AD), also called algorithmic differentiation or autodiff, which is the fundamental subject of this dissertation. 
+
+Manual differentiation is a tedious, time consuming and prone to error procedure, requiring a model to be defined as a closed-form expression, eliminating or severely confining algorithmic control flow and expressivity. Alternatively, numerical differentiation is relatively straightforward to implement but due to round-off and truncation errors it can be eminently inaccurate (\citet{jerrell1997automatic}) and unsatisfactorily scalable. On the other hand, symbolic differentiation sermonizes the defficiencies of both the manual and numerical methods, but often results in complex, cryptic and similarly to the manual technique closed-form expressions.
+
+The fourth technique, automatic differentiation, surmounts all of the above-mentioned obstacles, with its basic form consisting of applying symbolic differentiation at the elementary operation level and keeping intermediate numerical results, in lockstep with the evaluation of the main function (\citet{baydin2018automatic}). It can be proved that all numerical computations are ultimately compositions of a finite set of elementary operations for which derivatives are known (\citet{griewank2008evaluating}). One can enumerate for instance the binary arithmetic operations, the unary sign switch or transcendental functions, not to mention the exponential, the logarithm or the trigonometric functions. Moreover, the derivative of the overall composition can be easily derived from the chain rule, imposed on the derivatives of the constituent operations.
+
+A substantial point to emphasis is that AD can differentiate not only closed-form expressions in the classical sense, but the algorithms using control flow such as branching, loops, recursion and procedure calls as well. It will be essential for the looping structure of the Linear Time Iteration algorithm, discussed in section \ref{LTI}, for which the automatic differentiation seems like an indispensable tool in further maximization process.
+
+\subsection{Computational graph}
+
+The basic mathematical ideas behind AD have been known for a long period of time. However, interest in AD had definitely revived by 80s' due to improvements in programming techniques and the introduction of the efficient reverse mode. A useful tool in the development of AD following 1980 was the computational graph, which is a way of visualizing an algorithm or computer program different from formulas. For instance, Fig. \ref{Computational_graph} illustrates a computational graph, technically known as a directed acyclic graph (DAG). Transformations of the algorithm such as differentiation in forward or reverse mode can be thus expressed as modifications of the computational graph.
+
+\begin{figure}[H] \centering
+\includegraphics[scale=0.3]{Computational_graph}
+\caption[Computational graph]{Computational graph\footnotemark}
+\label{Computational_graph}
+\end{figure} 
+
+\footnotetext{Source: \citet{bucker2006automatic}}
+
+Paraphrasing it, a computation graph is a DAG in which nodes represent variables, such as matrices, scalars or tensors, while the edges depict some mathematical operations, for instance summation or multiplication. Thus, during the optimization step, the chain rule and the graph are combined in order to calculate the derivative of the output with respect to the learnable variable.
+
+There are two different modes of automatic differentiation, based on the application of the chain rule. The next section will start with forward mode automatic differentiation, which often is find a little more intuitive, described on the simple example.
+
+\subsection{Forward mode}
+
+Given a function $f$, one can construct a computational graph (a directed acyclic one) representing it, for instance let:
+
+\[ f(x,y) = \cos(x) \sin(y) + \dfrac{x}{y} \]
+
+As mentioned previously, each node of the graph expresses a primitive function, while the edges enact the flow of information:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth,height=0.8\textheight,keepaspectratio]{Aut_diff}
+\caption[Forward propagation]{Forward propagation\footnotemark}
+\label{Forward_propagation}
+\end{figure}
+
+\footnotetext{Source: \url{http://www.columbia.edu/~ahd2125/post/2015/12/5/}}
+
+Forward differentiation operates by recursive computation of derivatives of nodes in terms of their parents. Suppose one wants to calculate the partial $\dfrac{\partial f}{\partial x}$, denoted by $Df$. Then:
+
+\begin{align*}
+& Df = Dw_{7} = D(w_{5} + w_{6}) = Dw_{5} + Dw_{6} \\
+& Dw_{6} = D\dfrac{w_{1}}{w_{2}} = \dfrac{w_{1}Dw_{2}- w_{2}Dw_{1}}{w_{2}^{2}}  \\
+& Dw_{5} = Dw_{3}w_{4} = w_{3}Dw_{4} + w_{4}Dw_{3} \\
+& Dw_{4} = D\sin(w_{2}) = \cos(w_{2}) Dw_{2} \\
+& Dw_{3} = D\cos(w_{1}) = -\sin(w_{1}) Dw_{1} \\
+& Dw_{2} = Dy \\
+& Dw_{1} = Dx 
+\end{align*}
+
+The final value of $Df$ depends only on $x, y, Dw_{1}, Dw_{2}$. In this case, $ D = \dfrac{\partial f}{\partial x}$, so $Dx = 1$ and $Dy = 0$. Because information flows in the same direction as when one evaluates the expression (bottom-up), it is called the \textit{forward mode}. Predictably, the information flows top-down in  \textit{backward mode}, also called \textit{reverse mode}.
+
+\subsection{Backward mode}
+
+Reverse mode automatic differentiation lets calculate gradients much more efficiently than forward mode automatic differentiation. Suppose one wants to calculate the gradient of the $f$ function described in the previous section:
+
+\[ \triangledown f = \left<\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}\right> = \left<\frac{\partial w_{7}}{\partial w_{1}}, \frac{\partial w_{7}}{\partial w_{2}}\right> \]
+
+Then:
+
+\begin{align*}
+& \frac{\partial w_{7}}{\partial w_{1}} = \frac{\partial w_{3}}{\partial w_{1}} \frac{\partial w_{7}}{\partial w_{3}} + \frac{\partial w_{6}}{\partial w_{1}} \frac{\partial w_{7}}{\partial w_{6}} = -\sin w_{1} \frac{\partial w_{7}}{\partial w_{3}} + \frac{1}{w_{2}} \frac{\partial w_{7}}{\partial w_{6}} \\
+& \frac{\partial w_{7}}{\partial w_{2}} = \frac{\partial w_{4}}{\partial w_{2}} \frac{\partial w_{7}}{\partial w_{4}} + \frac{\partial w_{6}}{\partial w_{2}} \frac{\partial w_{7}}{\partial w_{6}} = \cos w_{2} \frac{\partial w_{7}}{\partial w_{4}} - \frac{w_{1}}{w_{2}^{2}} \frac{\partial w_{7}}{\partial w_{6}} \\
+& \frac{\partial w_{7}}{\partial w_{3}} = \frac{\partial w_{5}}{\partial w_{3}} \frac{\partial w_{7}}{\partial w_{5}} = w_{4} \frac{\partial w_{7}}{\partial w_{5}} \\
+& \frac{\partial w_{7}}{\partial w_{4}} = \frac{\partial w_{5}}{\partial w_{4}} \frac{\partial w_{7}}{\partial w_{5}} = w_{3} \frac{\partial w_{7}}{\partial w_{4}} \\
+& \frac{\partial w_{7}}{\partial w_{5}} = 1 \\
+& \frac{\partial w_{7}}{\partial w_{6}} = 1
+\end{align*}
+
+Instead of implementing the chain rule to get derivatives of parents in terms of their children, one proceeds fully oppositely, computing derivatives of children nodes in terms of their parents. Because information flows top-down, the reverse of normal evaluation, it is called the \textit{reverse mode} automatic differentiation.
+
+Notice that  all operations in reverse mode differentiation are scalar operations, even though one calculates the (vector) gradient. Computing gradients via reverse mode can be thus significantly faster if $f$ contains a vast number of input variables.
+
+\section{Tensor platform}
+
+PyTorch is a relatively new deep learning library, backing dynamic computation graphs and tensors which can tap into the resources of a GPU to significantly speed up matrix operations. The dynamic graph paradigm allows to make changes to the model architecture during runtime, as a graph is created only when a piece of code is run. This means a graph may be redefined during the lifetime for a program. This, however, is not possible with static graphs, used by another popular deep learning libraryTensorFlow, where graphs are created before running the program, and merely executed later. 
+
+Finally, PyTorch has in-built several optimization algorithms, such as Stochastic Gradient Descent or ADAM, which solves the likelihood maximization problem relatively costlessly.
+
+\subsection{GPU accelaration}
+
+A central processing unit (CPU) is essentially the brain of any computing device, effectuating the instructions of a program by enforcing control, logical, and input/output (I/O) operations. Today’s CPUs have just a handful of cores, and its basic design and purpose—to process complex computations—has not really changed over the years. Essentially, they are mostly applicable for problems that require parsing through or interpreting complex logic in code. A graphical processing unit (GPU), on the other hand, has smaller-sized but many more logical cores (arithmetic logic units or ALUs, control units and memory cache) whose basic design is to process a set of simpler and more identical computations in parallel. As a result, GPU can highly accelerate the Automatic Differentiation, in fact composed of simple matrix math calculations. 
+
+Both aforementioned deep learning libraries enable the GPU computation, therefore it can considered as valuable extension.
 
 \chapter{Dynamic Stochastic General Equilibrium (DSGE) model} \label{Dynamic Stochastic General Equilibrium (DSGE) model}
 
-It is generally acknowledged that a satisfactory macroeconomic model should be grounded on rational intertemporal optimizing behavior of microagents, satisfying the rational expectations assumption. Furthermore, it should reflect the imperfectly flexible wages and prices, associated with deficiencies on labor and product markets. One of the most renowned New Keynesian model satisfying the above-mentioned presumptions was developed by \citet{smets2003estimated}, as the elaboration of previous work of \citet{christiano2005nominal}.
+It is generally acknowledged that a satisfactory macroeconomic model should be grounded on rational intertemporal optimizing behavior of microagents, satisfying the rational expectations assumption. Furthermore, it should reflect the imperfectly flexible wages and prices, associated with deficiencies on labor and product markets. One of the most renowned New Keynesian model satisfying the above-mentioned presumptions was developed by \citet{smets2003estimated}, as the elaboration of previous work of \citet{christiano2001nominal}.
 
-Succinctly, it assumes that in the closed economy framework there exists a continuum of households, who supply household-specific labor in monopolistically competitive environment. In addition, they set Calvo-sticky wages, deriving utility from consumption relative to their habits and disutility from work. Households save and part of their savings is transformed into capital through a household technology, which in turn has its own adjustment costs. Moreover, they rent out their capital to the intermediate-good sector and choose total amount of  investment with variable capital utilization rate. The rest of their savings is spent for lending and borrowing decisions, not to mention the bond holding settlements.
+Succinctly, it assumes that in the closed economy framework there exists a continuum of households, who supply household-specific labor in monopolistically competitive environment. In addition, they set Calvo-sticky wages, deriving utility from leisure and consumption in relation to their habits. Households save and part of their savings is transformed into capital through a household technology, which in turn has its own adjustment costs. Moreover, they rent out their capital to the intermediate-good sector and choose total amount of  investment with variable capital utilization rate. The rest of their savings is spent for lending and borrowing decisions, not to mention the bond holding settlements.
 
 On the firm side, a continuum of intermediate goods produced by firms in monopolistic competition is assumed. Their production requires various kinds of differentiated labor and (homogeneous) capital, leading to the Calvo-sticky prices setting. On the other hand, final goods are produced in perfect competition framework through intermediate goods and they are consumed by households and government, allowing for the fiscal policy and Taylor-type monetary policy rule.
 
-Finally, there is a plethora of sources of shocks, such as two preference shocks, labor substitutability shock, intermediate-goods substitutability shock and aggregate productivity shock, goods mark-up or cost push shock, shocks to investment cost or monetary policy rule shock (similarly to the \citet{christiano2005nominal}).
+Finally, there is a plethora of sources of shocks, such as two preference shocks, aggregate productivity shock or monetary policy rule shock (similarly to the \citet{christiano2005nominal}).
 
 After introduction of the main essence of the \citet{smets2003estimated}  model, in the following sections it will be derived meticulously.
 
@@ -260,7 +415,7 @@ W_{t}^{\tau} = \left( \Pi_{t-1} \right)^{\gamma_{w}}W_{t-1}^{\tau} = \left( \fra
 
 where $\gamma_{w}$ is the degree of wage indexation, such that $\gamma_{w} = 0$ entails no indexation ($W_{t}^{\tau} = W_{t-1}^{\tau}$), while $\gamma_{w} = 1$ suggests a complete indexation ($W_{t}^{\tau} = \Pi_{t-1} W_{t-1}^{\tau}$).
 
-After denoting by $\widetilde{W}_{t}$ the wage of the household that in period t can reoptimize, it follows:
+After denoting by $\widetilde{W}_{t}$ the wage of the household which is able to reoptimize in period $t$, it follows:
 
 \begin{align}
 W_{t}^{\tau} = \begin{cases}
@@ -269,7 +424,7 @@ W_{t}^{\tau} = \begin{cases}
 \end{cases}
 \end{align}
 
-The equation of motion for the aggregate wage index $W_{t}$ can be obtained through \ref{Aggregate labor demand}:
+Therefore, the motion for the aggregate wage index $W_{t}$ equation can be computed through \ref{Aggregate labor demand}:
 
 \begin{align}
 \left(W_{t}\right)^{\frac{-1}{\lambda_{w,t}}} &= \varsigma_{w} \cdot \int\limits_{0}^{1} \left( W_{t-1}\left( \frac{P_{t-1}}{P_{t-2}} \right)^{\gamma_{w}} \right)^{\frac{-1}{\lambda_{w,t}}} d\tau + (1 - \varsigma_{w}) \cdot \int\limits_{0}^{1} \widetilde{W}_{t}^{\frac{-1}{\lambda_{w,t}}} d\tau = \nonumber \\ 
@@ -285,7 +440,7 @@ W_{t+2}^{\tau} &= \left( \frac{P_{t+1}}{P_{t}} \right)^{\gamma_{w}}  W_{t+1}^{\t
 W_{t+i}^{\tau} &= \left( \frac{P_{t+i-1}}{P_{t-1}} \right)^{\gamma_{w}} \widetilde{W}_{t} \nonumber \\
 \end{align}
 
-Households that can re-set their wages maximize their objective function subject to their budget constraint and the demand of labor, taking into consideration the fact that wages remain fixed until period $i$ with a probability $\left( \varsigma_{w} \right)^{i}$, which yields:
+Resetting-wages households maximize their objective function subject to their budget constraint and the demand of labor, taking into consideration the fact that wages remain fixed until period $i$ with a probability $\left( \varsigma_{w} \right)^{i}$, which yields:
 
 \begin{align}
 \frac{\widetilde{W}_{t}}{P_{t}} &\mathbb{E}_{t} \left\{ \sum\limits_{i=0}^{\infty} \beta^{i} \varsigma_{w}^{i} \left( \frac{P_{t+i-1}}{P_{t-1}} \right)^{\gamma_{w}}  \frac{P_{t}}{P_{t+i}} \left( \frac{l_{t+1}^{\tau} U_{t+i}^{C}}{1 + \lambda_{w, t+i}} \right) \right\} = \nonumber \\
@@ -305,17 +460,17 @@ It will be moreover assumed that the degree of substitutability $\lambda_{w, t}$
 \lambda_{w, t} = \lambda_{w} + \eta_{t}^{w}, \quad \eta_{t}^{w} \sim \mathcal{N} \left(0, \sigma^{2}_{\eta_{w}} \right)
 \end{align}
 
-In the flexible-wage economy, $1+\lambda_{w, t}$ will be the markup of real wages over the usual ratio of the marginal disutility of labor to the marginal utility of consumption. Thus, $\eta_{t}^{w}$ can be regarded as a wage markup shock.
+In the flexible-wage economy, $1+\lambda_{w, t}$ will be the markup of real wages over the classical ratio of the marginal disutility of labor to the marginal utility of consumption. Thus, $\eta_{t}^{w}$ can be regarded as a wage markup shock.
 
 \subsection{Capital accumulation and investment decision} \label{Capital accumulation and investment decision}
 
-Households own the stock of capital of the economy and rent it at the rate $r_{t}^{k}$ to the firms of the intermediate sector. Moreover, investment in period $t-1$ increases the stock of capital in period $t$ and households are assumed to choose the utilization rate $z_{t}$ of their stock of capital. The equation of motion of capital becomes:
+Households are the proprietors of the stock of capital of the economy and rent it at the rate $r_{t}^{k}$ to the firms of the intermediate sector. Moreover, investment in period $t-1$ increases the stock of capital in period $t$ and households are assumed to choose the utilization rate $z_{t}$ of their stock of capital. The equation of motion of capital becomes:
 
 \begin{align}
 K_{t} = K_{t-1} (1 - \tau) + I_{t} \left[ 1 - S \left(\frac{\varepsilon_{t}^{I}I_{t}}{I_{t-1}} \right) \right]
 \end{align}
 
-where $\tau$ is the depreciation rate, while the function $S$ introduces in the model the adjustment costs for investment that depend on its rate of growth, proposed in order to avoid strong oscillations of capital. It will be  furthermore assumed that for the constant growth rate of investment, as in the steady state, $S(1)=0$ and similarly in the neighborhood of the steady state $S'(1) = 0$. Hence, adjustment costs depend only on the second derivative such that $S''(1)>0$. Finally, the function $S$ is subject to a shock $\varepsilon_{t}^{I}$ following an $AR(1)$ process:
+where $\tau$ is the depreciation rate, while the function $S$ introduces in the model the adjustment costs for investment, which in turn are contingent on its rate of growth, proposed in order to avoid strong oscillations of capital. It will be  furthermore assumed that for the constant growth rate of investment, as in the steady state, $S(1)=0$ and similarly in the neighborhood of the steady state $S'(1) = 0$. Thus, adjustment costs depend solely on the second derivative such that $S''(1)>0$. Finally, the function $S$ is subject to a shock $\varepsilon_{t}^{I}$ following an $AR(1)$ process:
 
 \begin{align}
 \varepsilon_{t}^{I} = \rho_{I} \varepsilon_{t-1}^{I} + \eta_{t}^{I}, \quad  \eta_{t}^{I} \sim \mathcal{N} \left(0,1\right)
@@ -330,15 +485,15 @@ Solving the respective maximization problem with the Lagrange multiplier in the 
 \qquad &= \mathbb{E}_{t} \left[ \beta^{t+1} \lambda_{t+1} Q_{t+1} \left(I_{t+1} \cdot S' \left(\frac{\varepsilon_{t+1}^{I}I_{t+1}}{I_{t}} \right) \cdot \frac{-\varepsilon_{t+1}^{I} I_{t+1}}{I_{t}^{2}} \right) \right]
 \end{align}
 
-In other words the capital utilization rate is set so that the revenue $r_{t}^{k}$ of the marginal utilization equals the marginal costs $\Psi'(z_{t})$, the real value of the stock of capital today $\lambda_{t} Q_{t}$ is equal to the expected value of sum of not depreciated stock of capital of the next period $\lambda_{t+1}Q_{t+1}(1-\tau)$ and the expected revenue of the future utilization $ z_{t+1}r_{t+1}^{k}$ minus the related costs $\Psi(z_{t+1})$, while the costs of the marginal investment (included the adjustment costs) must be equal to the expected marginal revenue of investment.
+In other words the capital utilization rate is set so that the revenue $r_{t}^{k}$ of the marginal utilization equals the marginal costs $\Psi'(z_{t})$, the today's real value of the stock of capital $\lambda_{t} Q_{t}$ is balanced with the expected value of sum of not depreciated stock of capital of the next period $\lambda_{t+1}Q_{t+1}(1-\tau)$ and the expected revenue of the future utilization $ z_{t+1}r_{t+1}^{k}$ minus the related costs $\Psi(z_{t+1})$, while the costs of the marginal investment (included the adjustment costs) have to be identical to the expected marginal revenue of investment.
 
-In addition, $\lambda_{t} Q_{t}$ can be viewed as the marginal value of capital. Therefore, regarding the fact that $\lambda_{t}$ equals the marginal utility of consumption, $Q_{t}$ can be interpreted as marginal Tobin-Q (the ratio of the marginal value of capital due to the increase of the capital stock over the marginal opportunity cost):
+Additionally, $\lambda_{t} Q_{t}$ can be regarded as the marginal value of capital. Thus, basing on the fact that $\lambda_{t}$ break evens the marginal utility of consumption, $Q_{t}$ can be viewed as marginal Tobin-Q (the ratio of the marginal value of capital by virtue of the increment of the capital stock over the marginal opportunity cost):
 
 \begin{align}
 Q_{t} = \frac{\lambda_{t} Q_{t}}{\lambda_{t}}
 \end{align}
 
-At the steady-state $Q=1$, thus marginal revenues and costs compensate each other. If $Q>1$ there are incentives to increase the capital accumulation through investment, while if $Q<1$ the reverse holds true.
+At the steady-state $Q=1$, thus marginal revenues and costs mutually reimburse. If $Q>1$ there are enticements to upturn the capital accumulation through investment, while if $Q<1$ the reverse holds true.
 
 \section{Firms} \label{DSGE - Firms}
 
@@ -391,7 +546,7 @@ where marginal costs takes the form:
 MC_{t} = \frac{1}{\varepsilon_{t}^{a}} W_{t}^{1-\alpha} \left(r_{t}^{k} \right)^{\alpha} \left( \alpha^{-\alpha} (1-\alpha)^{-(1-\alpha)}\right)
 \end{align}
 
-The profits of intermediate goods firms are paid as dividends $D_{t}$.
+The profits of intermediate goods firms are assumed to be returned as dividends $D_{t}$.
 
 In order to perform the maximization task, it uses a discount factor ($\beta^{k} \rho_{t +k}$) that is based on the fact that firms belong to households. From the Euler-equation of consumption, it holds:
 
@@ -449,7 +604,7 @@ The optimal price is set so that firms impose a premium over the average margina
 
 \section{The log-linearised DSGE model} \label{The log-linerised DSGE model}
 
-In the following section, the log-linearised version of the DSGE model adopted in this paper is described. The hat symbol above the variable will denote the log deviations from its steady state. The dynamics of aggregate consumption is given by:
+In the following section, the log-linearised version of the DSGE model adopted in this paper is described. The hat symbol above the variable will denote the log deviations from its steady state. The dynamics of aggregate consumption is seized by:
 
 \begin{align}
 R_{t} + \mathbb{E}_{t} \hat{\varepsilon}^{B}_{t+1} - \frac{\sigma_{c}}{1-h} \left( \mathbb{E}_{t}\hat{C}_{t+1} - h \hat{C}_{t} \right) = \hat{\varepsilon}^{B}_{t+1} - \frac{\sigma_{c}}{1-h} \left( \hat{C}_{t} - h \hat{C}_{t-1} \right) + \mathbb{E}_{t} \hat{\Pi}_{t+1}
@@ -477,7 +632,7 @@ Due to the steady state condition $\beta = \frac{1}{1-\tau +r^{k}}$, the lineari
 \hat{Q}_{t} = - \left( \hat{R}_{t} - \mathbb{E}\hat{\pi}_{t+1} \right) + \frac{1-\tau}{1-\tau +r^{k}} \mathbb{E}_{t} \hat{Q}_{t+1} + \frac{r^{k}}{1-\tau +r^{k}} \mathbb{E}_{t}\hat{r}^{k}_{t+1} + \eta_{t}^{Q}
 \end{align}
 
-An equity premium shock $\eta_{t}^{Q}$, normally and independently distributed, is added in order to take into account the effect of changes of the external refinancing premium over the value of the capital stock.
+An equity premium shock $\eta_{t}^{Q}$, normally and independently distributed, is added in order to take into account the effect of changes of the external refinancing premium over the the capital stock value.
 
 The linearization of the equation of the capital accumulation yields:
 
@@ -501,7 +656,7 @@ Similarly one obtains the linearized equation of motion for the real wage:
 \hat{w}_{t} - \sigma_{l} \hat{L}_{t} - \frac{\sigma_{c}}{1-h} \left( \hat{C}_{t} - h \hat{C}_{t-1} \right) - \hat{\varepsilon}_{t}^{L} - \hat{\eta}_{t}^{w} \right]
 \end{align}
 
-The real wage is a function of expected and past real wages and the expected, current and past inflation rate if $\gamma_{w}>0$. There is a negative effect of the deviation of the actual real wage from the wage that would prevail in a flexible labour market.
+The real wage is a function of expected and past real wages and the expected, current and past inflation rate if $\gamma_{w}>0$. There is a negative effect of the deviation of the actual real wage from one that would abound in a flexible labour market.
 
 The linearized demand of labor is:
 
@@ -571,21 +726,21 @@ The Taylor rule is obtained by minimizing the central bank loss function subject
 The central bank reacts to deviations of both the lagged inflation with respect to the target inflation (normalized to 0) and of the lagged output gap. The monetary policy is subject to two different kinds of shock: a shock of the target inflation process $ \bar{\pi}_{t} = \rho_{\pi} \bar{\pi}_{t-1} + \eta_{t}^{\pi}$ and shock
 of the interest rate $\eta_{t}^{R}$. The central smooths the interest rates by setting the present rate as a weighted average of the past interest rate and the optimal rate as a function of the above quantities.
 
-To sum up, in order to calculate the results, two systems have to be created: one is the flexible system where there is no price stickiness, wage stickiness or three cost-push shocks, while the other one is the sticky system where prices and wages are set following a Calvo mechanism. Then the potential output produced in the flexible system is used to calculate the output gap in the Taylor rule. In each system, there are eight endogenous variables and two state variables. The eight endogenous variables are as following: capital, consumption, investment, inflation, wages, output, interest rate and real capital stock. The two state variables are labor and return on capital.
+To sum up, in order to calculate the results, two systems have to be created: one is the flexible scheme without price stickiness, wage stickiness or three cost-push shocks, on contrary the other one should be viewed as the sticky system where prices and wages follow a Calvo mechanisms. Then the potential output obtained from the flexible system is implemented to compute the output gap in the Taylor rule. In each system, there are eight endogenous variables (capital, consumption, investment, inflation, wages, output, interest rate and real capital stock) and two state variables (labor and return on capital).
 
-\section{Solution}
+\chapter{Solution}
 
-Since \citet{blanchard1980solution} a number of alternative approaches for solving linear rational expectations models have emerged, not to mention the methods of \citet{uhlig1998toolkit}, \citet{klein2000using} or \citet{sims2002solving}. Economists use then their output for simulating models, estimating models, computing impulse response functions, calculating asymptotic covariance, solving infinite horizon linear quadratic control problems and constructing terminal constraints for nonlinear models. Despite the fact that for models satisfying the \citet{blanchard1980solution} conditions, the algorithms provide equivalent solutions, two algorithms will be presented in depth: the approach of \citet{klein2000using} for the illustrational purposes and the \citet{uhlig1998toolkit} toolkit for the actual implementation in Python.
+Since \citet{blanchard1980solution} a significant amount of substitutable approaches for solving linear rational expectations models have materialized, not to mention the methods of \citet{uhlig1998toolkit}, \citet{klein2000using} or \citet{sims2002solving}. Economists adopt then their output for simulating and estimating models, calculating impulse response functions and asymptotic covariance, solving infinite horizon linear quadratic control problems or finally constructing terminal constraints for nonlinear models. Despite the fact that for models satisfying the \citet{blanchard1980solution} conditions, the algorithms provide equivalent solutions, three algorithms will be presented in depth: the approach of \citet{klein2000using} for the illustrational purposes, the \citet{uhlig1998toolkit} toolkit for the actual implementation in Python and the Linear Time Iteration algorithm, whose differentiability will be substantial for the Automatic Differentiation application.
 
-\subsection{\citet{klein2000using} approach}
+\section{\citet{klein2000using} approach}
 
-DSGE model consists of state variables ($x_{t}$), control variables ($y_{t}$), transition equations for structural shocks and measurement errors ($\varepsilon_{t}$) and a vector of deep parameters $\theta$, which can be cast into a nonlinear first-order system of expectational difference equations:
+DSGE model consists of state variables ($x_{t}$), control variables ($y_{t}$), transition equations for structural shocks and measurement errors ($\varepsilon_{t}$) and a vector of deep parameters $\theta$, which can be injected into a nonlinear first-order system of expectational difference equations:
 
 \begin{align}
 \mathbb{E}_{t}f\left(x_{t+1},y_{t+1},x_{t},y_{t} | \, \theta \right) = 0
 \end{align}
 
-Solution is then characterized by transition equations for state and control variables, so-called \textit{policy-functions}, that solve (at least approximately) the system of equations $f$:
+Solution is then characterized by transition equations for state and control variables, so-called \textit{policy-functions}, that solve (at least approximately) the aforementioned system of equations:
 
 \begin{align}
 \left\{
@@ -596,7 +751,7 @@ y_{t} &= \widetilde{g} \left( x_{t} | \, \theta \right)
 \right.
 \end{align}
 
-Analytical derivation of $g$ and $h$ most of the times is impossible. One therefore distinguishes between linear (such as in \citet{klein2000using} or \citet{sims2002solving}) and non-linear methods (for instance \citet{schmitt2004solving} or \citet{gomme2011second}) of local approximation of the policy functions in a neighborhood of a particular point (mostly steady-state). The fundamental idea is to introduce the perturbation parameter $\sigma$ that captures the stochastic nature of the model. The general perturbation framework (in the spirit of \citet{schmitt2004solving}) is as follows:
+Unfortunately, in the majority of cases the analytical derivation of $g$ and $h$ is extremely difficult or even impossible. One therefore distinguishes between linear (such as in \citet{klein2000using} or \citet{sims2002solving}) and non-linear methods (for instance \citet{schmitt2004solving} or \citet{gomme2011second}) of local approximation of the policy functions in a neighborhood of a precise point (mostly steady-state). The fundamental idea is to introduce the perturbation parameter $\sigma$ that captures the stochastic nature of the model. The general perturbation framework (in the spirit of \citet{schmitt2004solving}) is as follows:
 
 \begin{align}
 \left\{
@@ -639,7 +794,7 @@ Substituting into the model:
 F(x_{t}, \sigma) = \mathbb{E}_{t} f \left( \underbrace{h(x_{t}, \sigma) + \sigma \varepsilon_{t+1}}_{x_{t+1}}, \underbrace{g \left( \overbrace{h\left(x_{t}, \sigma \right) + \sigma \varepsilon_{t+1}}^{x_{t+1}}, \sigma \right)}_{y_{t+1}}, x_{t}, \underbrace{g(x_{t}, \sigma)}_{y_{t}} \right)
 \end{align}
 
-After noticing that $f$ and its derivatives are 0 when evaluated at the non-stochastic steady state $\left(\bar{x}, 0\right)$, taking derivative of $F$ with respect to $\sigma$ and evaluating at the non-stochastic steady state yields:
+After noticing that $f$ and its derivatives are 0 when assessed at the non-stochastic steady state $\left(\bar{x}, 0\right)$, taking derivative of $F$ with respect to $\sigma$ and evaluating at the non-stochastic steady state yields:
 
 \begin{eqnarray}
 &F_\sigma(\overline{x},0) = E_t f_1[h_\sigma + \varepsilon_{t+1}] + E_t f_2 [g_x(h_\sigma+ \varepsilon_{t+1})+g_\sigma] + f_3\cdot 0 + f_4 g_\sigma = 0 \nonumber \\
@@ -648,7 +803,7 @@ After noticing that $f$ and its derivatives are 0 when evaluated at the non-stoc
 
 with $f_1= \frac{\partial f (\bar{x}, 0)}{\partial x_{t+1}}, f_2=  \frac{\partial f (\bar{x}, 0)}{\partial y_{t+1}},  f_3=\frac{\partial f (\bar{x}, 0)}{\partial x_{t},}  f_4=\frac{\partial f (\bar{x}, 0)}{\partial y_{t}}$. \\
 
-There are $n$ equations in $n$ unknowns in a linear and homogenous system, hence if there is a unique solution, it must be:
+There are $n$ equations in $n$ unknowns in a linear and homogenous system, hence in the case of unique solution, it must be:
 
 \begin{align}
 \left\{
@@ -666,51 +821,51 @@ Furthermore, taking derivative of $F$ with respect to $x_t$ and evaluating at th
 & \iff \underbrace{- \begin{bmatrix} \underset{(n\times n_x)}{f_1} & \underset{(n\times n_y)}{f_2} \end{bmatrix}}_{:=A} \begin{bmatrix} \underset{(n_x\times n_x)}{h_x} \\ \underset{(n_y\times n_x)}{g_x} \underset{(n_x\times n_x)}{h_x} \end{bmatrix}  = \underbrace{\begin{bmatrix} \underset{(n\times n_x)}{f_3} & \underset{(n\times n_y)}{f_4}\end{bmatrix}}_{:=B} \begin{bmatrix} \underset{(n_x\times n_x)}{I} \\\underset{(n_y\times n_x)}{g_x} \end{bmatrix}
 \end{eqnarray}
   
-There are $n\times n_x$ equations for $n\times n_x$ unknown elements of $h_x$ and $g_x$. Postmultiply by the deviation from the steady state $\widehat{x}_t := (x_t-\overline{x})$:
+Therefore there are $n\times n_x$ equations for $n\times n_x$ unknown elements of both $h_x$ and $g_x$. One can additionally multiply both sided by the deviation from the steady state $\widehat{x}_t := (x_t-\overline{x})$, what yields:
 
  \begin{align}
  A \begin{bmatrix} h_x \widehat{x}_t \\ g_x h_x \widehat{x}_t \end{bmatrix} = B \begin{bmatrix} \widehat{x}_t \\ g_x \widehat{x}_t \end{bmatrix}
   \end{align}
 
-Notice that the coefficient matrices are equivalent to the first order approximation:
+It is useful to discern that the coefficient matrices are tantamount to the first order approximation:
 
 \begin{eqnarray}
 A \mathbb{E}_t\begin{bmatrix} \widehat{x}_{t+1} \\ \widehat{y}_{t+1} \end{bmatrix} = B\begin{bmatrix} \widehat{x}_t\\ \widehat{y}_t \end{bmatrix} + \begin{bmatrix} \sigma \eta_x \varepsilon_{t+1} \\ 0\end{bmatrix}
 \end{eqnarray}
 
-If $A$ and $B$ are known matrices, then inverting $A$ yields solution for $h_x$ and $g_x$. Nevertheless, in general $A$ is singular and non-invertible. \cite{klein2000using} approach to approximate the first order solution using the generalized Schur decomposition will be therefore implemented, in order to uncouple system into a (block) triangular system of equations and solve system recursively.
+If $A$ and $B$ are known matrices, then undoubtedly inverting $A$ yields solution for $h_x$ and $g_x$. Moreover, $A$ is generally singular and non-invertible. \cite{klein2000using} approach to approximate the first order solution employing the generalized Schur decomposition is therefore implemented, in order to uncouple system into a (block) triangular system of equations and solve system recursively.
  
 \subsection{Matrix theory}
 
 \begin{mydef}
-Let $A$ and $B$ be two $n\times n$ matrices. The set of all matrices of the form $A-\lambda B$ with $\lambda \in \mathbb{C}$ is said to be a \emph{pencil}. The eigenvalues of the pencil are elements of the set $\lambda(A,B)$ defined by
+Let $A$ and $B$ be two square ($n\times n$) matrices. The set of all matrices of the form $A-\lambda B$ with $\lambda \in \mathbb{C}$ is forenamed to be a \textbf{pencil}. The eigenvalues of the pencil are elements of the set $\lambda(A,B)$ characterized by:
   \begin{align*}
     \lambda(A,B) =  \left\{z \in \mathbb{C}:det(A-zB)=0\right\}
   \end{align*}
 \end{mydef}
 
 \begin{mydef}
-Let $A$ and $B$ be two $n\times n$ matrices. Then $\lambda \in \lambda(A,B)$ is called a \emph{generalized eigenvalue} if there exist a nonzero vector $q\in \mathbb{C}^n$ such that $$A q = \lambda B q$$
+Let $A$ and $B$ be two square ($n\times n$) matrices. Then $\lambda \in \lambda(A,B)$ is forenamed a \textbf{generalized eigenvalue} if there exists a nonzero vector $q\in \mathbb{C}^n$ such that $$A q = \lambda B q$$
 \end{mydef}
 
-Notice that if $B=I$, then this simplifies to the ordinary eigenvalue problem: $A q = \lambda q$. Moreover, A always has $n$ eigenvalues, which can be ordered (in more than one way) to form an $n\times n$ diagonal matrix $\Lambda$ and a corresponding matrix of nonzero columns $Q$ that satisfies the eigenvalue equation:
+It is advantageous to detect that if $B=I$, then the above-mentioned intricacy simplifies to the ordinary eigenvalue problem: $A q = \lambda q$. Moreover, the $n$ eigenvalues of A can be ordered (generally in more than one way) to form an $n\times n$ diagonal matrix $\Lambda$ and a corresponding matrix of nonzero columns $Q$ that satisfies the eigenvalue equation:
 
 \begin{align}
 AQ = Q\Lambda
 \end{align}
 
 \begin{theorem}[Spectral decomposition]
-Let $A$ be a squared $(n\times n)$ matrix with $n$ linearly independent columns, then $A$ can be factorized as:
+Assume that $A$ is a square $(n\times n)$ matrix with $n$ linearly independent columns. Then $A$ can be factorized as:
   \begin{align*}
   AQ = Q \Lambda \Leftrightarrow A = Q \Lambda Q^{-1}
   \end{align*} 
-where $\Lambda$ is a diagonal matrix such that $\lambda_i =\Lambda_{ii}$ is the eigenvalue of $A$ associated to the eigenvector $q_i$ stored in column $i$ of the square $(n \times n)$ matrix $Q$.
+where $\Lambda$ is a diagonal matrix such that $\lambda_i =\Lambda_{ii}$ is the eigenvalue of $A$ related to the eigenvector $q_i$ gathered in column $i$ of the squared $(n \times n)$ matrix $Q$.
 \end{theorem}
 
 The proofs for the following section can be found for instance in \citet{roman2008graduate} or \citet{brown1988second}.  
 
 \begin{theorem}[Generalized (complex) Schur decomposition or QZ decomposition]
-Let $A$ and $B$ be $n\times n$ matrices. Then there exist matrices $Q,Z,T$ and $S$ such that
+Let $A$ and $B$ be square ($n\times n$) matrices. Then there exist matrices $Q$, $Z$, $T$ and $S$ such that
 \begin{align*}
   Q^* A Z &= S \Leftrightarrow A = Q S Z^*\\
   Q^* B Z &= T \Leftrightarrow B = Q T Z^*
@@ -718,7 +873,7 @@ Let $A$ and $B$ be $n\times n$ matrices. Then there exist matrices $Q,Z,T$ and $
 \begin{enumerate}
   \item $Q$ and $Z$ are unitary, i.e. $Q^*Q=QQ^*=I_n$ and $Z^*Z=ZZ^*=I_n$.
   \item $S$ and $T$ are upper triangular.
- \item pairs $(s_{ii},t_{ii})$ can be arranged in any desired order.
+ \item Pairs $(s_{ii},t_{ii})$ can be arranged in any desired order.
   \item If for some $i$, $t_{ii}$ and $s_{ii}$ are both zero, then $\lambda(A,B)=\mathbb{C}$. Otherwise:
 $\lambda(A,B) = \left\{\frac{s_{ii}}{t_{ii}}:t_{ii} \neq 0 \right\}$
 \end{enumerate}
@@ -747,7 +902,7 @@ Q^* B = T Z^*
 
 where the following order is chosen: the stable generalized eigenvalues $(|s_{ii}|>|t_{ii}|)$ come first. 
 
-Premultiplying by $Q^*$ and using:
+Multiplying both sides by $Q^*$ and using:
 
 \begin{align}
 \begin{bmatrix} \underset{n_x \times 1}{s_t} \\ \underset{n_y\times1}{u_t} \end{bmatrix} : = Z^* \begin{bmatrix} \underset{n_x \times 1}{\widehat{x}_t} \\ \underset{n_y \times 1}{\widehat{y}_t} \end{bmatrix}\end{align}
@@ -770,13 +925,13 @@ Solving the lower block first:
   S_{22} E_t[u_{t+1}] = T_{22} u_t
 \end{align}
 
-Note that due to the ordering $|s_{ii}|<|t_{ii}|$ (or $|s_{ii}|\leq|t_{ii}|$ ). Using backward-substitution, it can be shown, that any solution with bounded mean and variance must satisfy $u_t=0$ for all $t$ (unless $\Sigma=0$), otherwise the solution explodes. In other words, as many state variables as there are generalized eigenvalues with $|s_{ii}|>|t_{ii}|$ are needed. This property has a name:
+Note that due to the ordering $|s_{ii}|<|t_{ii}|$ (or $|s_{ii}|\leq|t_{ii}|$ ). Using backward-substitution, it can be proved, that each solution with bounded mean and variance must satisfy $u_t=0$ for all $t$ (unless $\Sigma=0$), otherwise the solution explodes. In other words, as many state variables as there are generalized eigenvalues with $|s_{ii}|>|t_{ii}|$ are needed. This property has a name:
 
 \begin{mydef}[\citet{blanchard1980solution} conditions]
 The number of generalized eigenvalues, that are in absolute terms greater than 1, must be equal to the number of state variables, in order to get a stable solution (saddle-path).
 \end{mydef}
 
-Now given that $u_t=0$, $x_t$ and $y_t$ from the definition of $s_t$ and $u_t$ become:
+Furthermore, given the fact that $u_t=0$, both $x_t$ and $y_t$ from the definition of $s_t$ and $u_t$ become:
 
 \begin{align}
   \begin{bmatrix} x_t \\ y_t \end{bmatrix} = \begin{bmatrix} Z_{11} & Z_{12}\\ Z_{21} & Z_{22} \end{bmatrix} \begin{bmatrix} s_t \\ u_t \end{bmatrix}
@@ -787,7 +942,7 @@ Now given that $u_t=0$, $x_t$ and $y_t$ from the definition of $s_t$ and $u_t$ b
   \end{cases}
 \end{align}
 
-If $Z_{11}$ is invertible, then:
+If $Z_{11}$ is nondegenerate, then:
 
 \begin{align}
   y_t = \underbrace{Z_{21} Z_{11}^{-1}}_{=g_x} x_t
@@ -805,13 +960,17 @@ Plugging in $s_t = Z_{11}^{-1} x_t$ one gets:
    E_t[ x_{t+1}] = \underbrace{Z_{11} S_{11}^{-1} T_{11} Z_{11}^{-1}}_{=h_x} x_t
 \end{align}
 
-Thus, in order to compute $h_x$, nonsingular $S_{11}$ and $Z_{11}$ are required. However, $S_{11}$ has full rank by construction. The \citet{klein2000using} algorithm can be summarized as follows: \\
+Thus, in order to compute $h_x$, nonsingular $S_{11}$ and $Z_{11}$ are required. However, $S_{11}$ has full rank by construction. The \citet{klein2000using} algorithm can be abridged in the following manner: \\
 
 \begin{algorithm}[H]
 \caption{\citet{klein2000using} algorithm}
  \KwData{Nonlinear first-order system of expectational difference equations\;}
  \KwResult{DSGE solution\;}
-Compute generalized Schur decomposition of $A=-\begin{bmatrix} f_1 & f_2\end{bmatrix}$ and $B=\begin{bmatrix} f_3 & f_4\end{bmatrix}$\;
+Calculate the generalized Schur decomposition of: \\
+\qquad \begin{align*} \begin{cases}
+A=-\begin{bmatrix} f_1 & f_2\end{bmatrix} \\
+B=\begin{bmatrix} f_3 & f_4\end{bmatrix}
+\end{cases} \end{align*} \\
 Reorder generalized eigenvalues such that $|s_{ii}|>|t_{ii}|$ in the upper left\;
   \eIf{\citet{blanchard1980solution} condition fulffiled}{
    \eIf{$Z_{11}$ invertible}{
@@ -827,9 +986,9 @@ Infeasible solution\;}
 
 Note that the squareness of $Z_{11}$ is referred to in the literature as the \citet{blanchard1980solution} order condition, while the non-singularity of $Z_{11}$ as the \citet{blanchard1980solution} rank condition.
 
-\subsection{\citet{uhlig1998toolkit} toolkit}
+\section{\citet{uhlig1998toolkit} toolkit}
 
-The \citet{uhlig1998toolkit} algorithm uses generalized eigenvalue calculations to obtain a solution for the matrix polynomial equation, based on the method of undetermined coefficients. The method is applied to systems written as:
+The \citet{uhlig1998toolkit} algorithm likewise employs generalized eigenvalue calculations to glean a solution for the matrix polynomial equation, based on the method of undetermined coefficients. The method is applied to systems written as:
 
 \begin{align}
 0 &= Ax' + Bx + Cy + Dz \nonumber \\
@@ -894,7 +1053,7 @@ Matrix $Q$ is the only unknown, but it is not trivial, as $Q$ is sandwiched. Nev
 & \Rightarrow vec(Q) = \left[ I \otimes \left(G + JR - KC^{-1}A \right) - N^{T} \otimes \left(JC^{-1}A \right)\right]^{-1} vec\left(JC^{-1}DN - KC^{-1}D + M \right)
 \end{align}
 
-It has to be underlined that for the \citet{uhlig1998toolkit} procedure, one must choose \textit{jump} variables to guarantee that the $C$ matrix has full rank, i.e. augment the system with a \textit{dummy variable} and respective equations.
+It has to be underlined that for the \citet{uhlig1998toolkit} procedure, one must choose \textit{jump} variables to maintain the full rank of $C$ matrix, namely augment the system with a \textit{dummy variable} and respective equations.
 
 Solution of \citet{uhlig1998toolkit} toolkit is a state space system: a transition equation supplemented with a measurement equation. Moreover, it can be viewed as a restricted VAR(1):
 
@@ -925,34 +1084,34 @@ Y' &= \begin{bmatrix}
 
 Finally, it has to be emphasised that the \citet{uhlig1998toolkit} and \citet{klein2000using} solutions are equivalent (\citet{bonaldi2010identification}).
 
-\subsection{Linear Time Iteration procedure}
+\section{Linear Time Iteration procedure} \label{LTI}
 
 \citet{uhlig1998toolkit} procedure provided the foundations for the techniques to solve a  \citet{smets2003estimated} model. Nevertheless, due to the implementation of non-differentiable QZ-algorithm, its usefulness for the machine learning frameworks exploiting the benefits of automatic differentiation is questionable. Therefore, the Linear Time Iteration Procedure of \cite{rendahl2017linear} is proposed as an alternative, yielding identical results to the \citet{uhlig1998toolkit} approach.
 
 The model of interest is once again given by:
 
 \begin{align}
-Ax_{t-1} + Bx_{t} + Cx_{t+1} + u_{t} = 0
+AX_{t-1} + BX_{t} + CX_{t+1} + \mathbf{u}_{t} = 0
 \end{align}
 
-where $x_{t}$ is an $n \times 1$ vector containing endogenous and exogenous variables, $u_{t}$ is an $n \times 1$ vector of mean-zero disturbances, and $A$, $B$ and $C$ are conformable matrices.
+where $X_{t}$ is an $n \times 1$ vector containing endogenous and exogenous variables, $\mathbf{u}_{t}$ is an $n \times 1$ vector of mean-zero disturbances, and $A$, $B$ and $C$ are conformable matrices.
 
-The assumed form of the recursive solutions is as follows:
+Similarly, one assumes the recursive solutions in form:
 
 \begin{align}
-x_{t} = Fx_{t-1} + Qu_{t}
+X_{t} = FX_{t-1} + G\mathbf{u}_{t}
 \end{align}
 
-Inserting into the previous equation:
+Inserting into the preceding equation:
 
 \begin{align}
-Ax_{t-1} + Bx_{t} + CFx_{t} + u_{t} = 0
+AX_{t-1} + BX_{t} + CFX_{t} + \mathbf{u}_{t} = 0
 \end{align}
 
-Thus, the matrix $Q$ is given by:
+Thus, the matrix $Q$ is trivially defined by:
 
 \begin{align}
-Q = -\left( B + CF \right)^{-1}
+G = -\left( B + CF \right)^{-1}
 \end{align}
 
 Moreover, $F$ must be the solution to the quadratic matrix equation:
@@ -964,19 +1123,19 @@ A + BF + CF^{2} = 0
 Undoubtedly, if $F$ is known, finding $Q$ is a trivial operation, therefore one should focus on finding $F$. Recall that it is sufficient to solve the deterministic part of the problem in order to retrieve it:
 
 \begin{align}
-Ax_{t-1} + Bx_{t} + Cx_{t+1}  = 0
+AX_{t-1} + BX_{t} + CX_{t+1}  = 0
 \end{align}
 
-Suppose one has a candidate solvent: $F_{n}$. Then consider solving the following problem for $x_{t}$:
+Suppose one has a candidate solvent: $F_{n}$. Then the solution of the succeeding problem for $X_{t}$:
 
 \begin{align}
-Ax_{t-1} + Bx_{t} + CF_{n}x_{t}  = 0
+AX_{t-1} + BX_{t} + CF_{n}X_{t}  = 0
 \end{align}
 
-The solution is trivially given by:
+is trivially given by:
 
 \begin{align}
-x_{t} = -\left( B + CF_{n} \right)^{-1} Ax_{t-1}
+X_{t} = -\left( B + CF_{n} \right)^{-1} AX_{t-1}
 \end{align}
 
 Thus, the initial guess should be updated according to:
@@ -987,118 +1146,372 @@ F_{n+1} = -\left( B + CF_{n} \right)^{-1} A
 
 Furthermore, the author proves that the above-mentioned procedure converges to the DSGE solution under the \citet{blanchard1980solution} conditions and provides an enhanced technique to deal with common situations in which solvents contain eigenvalues that are zero.
 
-In addition, {\color{red} ADD PABLO RESULTS}.
+In addition, {\color{red} ADD citation} provides the simple criterion, equivalent to the  \citet{blanchard1980solution} conditions, to determine whether the obtained solution is stable and unique:
 
-\subsection{Certainty-equivalence-property}
+\begin{align}
+\left\{
+\begin{array}{cl}
+\lambda(F) &< 1 \nonumber \\
+\lambda \left( \left(AF + B \right)^{-1} A \right) &< 1 
+\end{array}
+\right.
+\end{align}
 
-To conclude the solution section, even though agents take the effect of future shocks into account when optimizing, in a linearization to the first-order they don't matter for the decision rule.
+where $\lambda(\cdot)$ denotes the spectral radius of a linear operator (the norm of its biggest eigenvalue).
 
-\begin{mydef}[Certainty-equivalence-property]
-In a first-order approximation the constant term needs not to be corrected for uncertainty (i.e. variance of shocks). Moreover, expectation of $x_t$ and $y_t$ is equal to its non-stochastic steady-state.
-\end{mydef}
+It is worth noticing that the stability implies not only the long-term \textit{determinancy} (the model does not explode), but also the \textit{predictability} (also called \textit{non-chaoticity}), meaning that the small deviations disappear over time.
 
-This is problematic when uncertainty does matter, not to mention the risk premium or welfare evaluation. A second-order approximation can be then implemented, thus being regarded as a potential extension.
+%\section{Certainty-equivalence-property}
+%
+%To conclude the solution section, even though agents take the effect of future shocks into account when optimizing, in a linearization to the first-order they don't matter for the decision rule.
+%
+%\begin{mydef}[Certainty-equivalence-property]
+%In a first-order approximation the constant term needs not to be corrected for uncertainty (i.e. variance of shocks). Moreover, expectation of $x_t$ and $y_t$ is equal to its non-stochastic steady-state.
+%\end{mydef}
+%
+%This is problematic when uncertainty does matter, not to mention the risk premium or welfare evaluation. A second-order approximation can be then implemented, thus being regarded as a potential extension.
 
-\chapter{Estimation}
+\chapter{Estimation} \label{Estimation}
 
-In the previous section the linear rational expectations model was solved by several different techniques, with the emphasis imposed on the Linear Time Iteration algorithm due to its differentiability, resulting in a state equation in the predetermined state variables. As the main interest of the paper is to implement the machine learning techniques to the DSGE model estimation, the formerly derived model should be written in the state space form, by adding a measurement equation linking the three observable variables (labor, consumption, investment) to the vector of state variables. Moreover, the likelihood function should be calculated using the Kalman filter, whose maximization leads to the parameters estimation.
+In the previous section the linear rational expectations model was solved by several different techniques, with the emphasis imposed on the Linear Time Iteration algorithm due to its differentiability, resulting in a state equation in the predetermined state variables. As the fundamental interest of the paper is to invoke the machine learning techniques to the DSGE model estimation, the formerly derived model should be written in the state space form, by adding a measurement equation linking the three observable variables (labor, consumption, investment) to the vector of state variables. Moreover, the likelihood function should be calculated using the Kalman filter, whose maximization by the Stochastic Gradient Descent leads to the parameters estimation. All three aforementioned components are described in the following sections.
 
-The maximization of the likelihood function can be performed through standard optimization procedures such as L-BFGS (\citet{zhu1997algorithm}) or stochastic gradient descent (\citet{bottou2010large}), both of them involving the calculation of derivatives. In fact, derivatives, predominantly in the form of gradients and Hessians of the objective function, are omnipresent in machine learning (\citet{sra2011introduction}). Techniques for the computation of derivatives in programming languages can be classified into four main categories: (1) manually deriving derivatives and coding them; (2) numerical differentiation using finite difference approximations; (3) symbolic differentiation using expression manipulation in computer algebra systems such as Mathematica, Maxima, and Maple; (4) automatic differentiation (AD), also called algorithmic differentiation or autodiff, which is the fundamental subject of this dissertation. To be more precise, the machine learning methods of the paper consist of the automatic differentiation procedure, implemented during the maximization process, as well as the proper ecosystem of tensor computations such as PyTorch or TensorFlow. Both of them are described in the following sections.
+\section{Kalman filter}
 
-\section{Automatic differentiation}
+With unobservable state variables, one can exploit the recursive nature of the model and its fully-specified laws of motion to apply filters like the one proposed by \citet{kalman1960new}. Namely the solved model, augmented by the measurement equation, in the state space representation is as follows:
 
-Manual differentiation is a tedious, time consuming and prone to error procedure, requiring a model to be defined as a closed-form expression, eliminating or severely confining algorithmic control flow and expressivity. Alternatively, numerical differentiation is straightforward to implement but can be highly inaccurate due to round-off and truncation errors (\citet{jerrell1997automatic}) and it is poorly scalable. On the other hand, symbolic differentiation addresses the weaknesses of both the manual and numerical methods, but often results in complex, cryptic and similarly to the manual technique closed-form expressions.
+\begin{align}
+X_{t} &= F_{t} X_{t-1} + G_{t} \mathbf{u}_{t}, \quad t \geqslant 0 \\
+Z_{t} &= H_{t} X_{t} + \mathbf{v}_{t}
+\end{align}
 
-The fourth technique, automatic differentiation, surmounts all of the above-mentioned obstacles, with its basic form consisting of applying symbolic differentiation at the elementary operation level and keeping intermediate numerical results, in lockstep with the evaluation of the main function (\citet{baydin2018automatic}). It can be shown that all numerical computations are ultimately compositions of a finite set of elementary operations for which derivatives are known (\citet{griewank2008evaluating}), such as the binary arithmetic operations, the unary sign switch and transcendental functions, not to mention the exponential, the logarithm or the trigonometric functions. What is more, combining the derivatives of the constituent operations through the chain rule gives the derivative of the overall composition.
+where $\mathbf{u}_{t}$ and $\mathbf{v}_{t}$ are independent, zero-mean Gaussian white processes with covariances:
 
-A substantial point to emphasis is that AD can differentiate not only closed-form expressions in the classical sense, but also algorithms using control flow such as branching, loops, recursion and procedure calls, giving it an important advantage over symbolic differentiation which markedly limits such expressivity. Recalling the looping structure of the Linear Time Iteration algorithm, the automatic differentiation seems like an indispensable tool for the maximization process.
+\begin{align}
+\mathbb{E} \left(\mathbf{u}_{t} \mathbf{u}_{d}^{T} \right) &= R_{t} \iota _{td} \\
+\mathbb{E} \left(\mathbf{v}_{t} \mathbf{v}_{d}^{T} \right) &= Q_{t} \iota _{td}
+\end{align}
 
-\subsection{Computational graph}
 
-The basic mathematical ideas behind AD have been around for a long time. However, interest in AD had definitely revived by 80s' due to improvements in programming techniques and the introduction of the efficient reverse mode. A useful tool in the development of AD following 1980 was the computational graph, which is a way of visualizing an algorithm or computer program different from formulas. For instance, Fig. \ref{Computational_graph} illustrates a computational graph, technically known as a directed acyclic graph (DAG). Transformations of the algorithm such as differentiation in forward or reverse mode can be thus expressed as modifications of the computational graph.
+Moreover, the initial state $X_{0}$ is assumed to be Gaussian random variable, independent of the noise processes, with:
 
-\newpage
+\begin{align}
+X_{0} \sim \mathcal{N} \left(\bar{X}_{0}, P_{0} \right)
+\end{align}
 
-\begin{figure}[H] \centering
-\includegraphics[scale=0.4]{Computational_graph}
-\caption[Computational graph]{Computational graph\footnotemark}
-\label{Computational_graph}
-\end{figure} 
+In addition, let $\tilde{Z}_{t} = (Z_{0}, \ldots, Z_{t})$. The goal is to compute recursively the following optimal estimator ox $X_{t}$:
 
-\footnotetext{Source: \citet{bucker2006automatic}}
+\begin{align}
+\hat{X}_{t}^{+} \equiv \hat{X}_{t | t} = \mathbb{E} (X_{t} | \tilde{Z}_{t})
+\end{align}
 
-In simple terms, a computation graph is a DAG in which nodes represent variables (tensors, matrix, scalars, etc.) and edge represent some mathematical operations (for example, summation, multiplication). The computation graph has some leaf variables. The root variables of the graph are computed according to operations defined by the graph. During the optimization step, we combine the chain rule and the graph to compute the derivative of the output w.r.t the learnable variable in the graph and update these variables.
+Define as well the \textit{one-step predictor} of $X_{t}$:
 
-There are two different modes of automatic differentiation, based on the application of the chain rule. The next section will start with forward mode automatic differentiation, which often is find a little more intuitive, described on the simple example.
+\begin{align}
+\hat{X}_{t}^{-} \equiv \hat{X}_{t | t-1} = \mathbb{E} (X_{t} | \tilde{Z}_{t-1})
+\end{align}
 
-\subsection{Forward mode}
+and the respective covariance matrices:
 
-Given a function $f$, one can construct a computational graph (a directed acyclic one) representing it, for instance let:
+\begin{align}
+P_{t}^{+} \equiv P_{t | t} &= \mathbb{E} \left[ \left(X_{t} -\hat{X}_{t}^{+} \right) \left(X_{t} - \hat{X}_{t}^{+} \right)^{T} |  \tilde{Z}_{t}\right] \\
+P_{t}^{-} \equiv P_{t | t-1} &= \mathbb{E} \left[ \left(X_{t} -\hat{X}_{t}^{+} \right) \left(X_{t} - \hat{X}_{t}^{+} \right)^{T} |  \tilde{Z}_{t-1} \right]
+\end{align}
 
-\[ f(x,y) = \cos(x) \sin(y) + \dfrac{x}{y} \]
+Finally denote:
 
-Then each node of the graph represents a primitive function, while the edges represent the flow of information:
+\begin{align}
+P_{0}^{-} &= P_{0} \\
+\hat{X}_{t}^{-} &= \bar{X}_{0}
+\end{align}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.8\textwidth,height=0.8\textheight,keepaspectratio]{Aut_diff}
-\caption[Forward propagation]{Forward propagation\footnotemark}
-\label{Forward_propagation}
-\end{figure}
+From the normality, it follows that the conditional random variable $(X_{t} | \tilde{Z}_{d})$ for any $t, d$. In particular:
 
-\footnotetext{Source: \url{http://www.columbia.edu/~ahd2125/post/2015/12/5/}}
+\begin{align}
+(X_{t} | \tilde{Z}_{t}) &\sim   \mathcal{N} \left(\hat{X}_{t}^{+}, P_{t}^{+} \right) \\
+(X_{t} | \tilde{Z}_{t-1}) &\sim  \mathcal{N} \left(\hat{X}_{t}^{-}, P_{t}^{-} \right)
+\end{align}
 
-Forward differentiation works by recursively defining derivatives of nodes in terms of their parents. Suppose one wants to calculate the partial $\dfrac{\partial f}{\partial x}$, denoted by $Df$. Then:
+In order to derive the Kalman filter, suppose, at time $t$, that $\left(\hat{X}_{t}^{-}, P_{t}^{-} \right)$ is given. Then $\left(\hat{X}_{t}^{+}, P_{t}^{+} \right)$ and $\left(\hat{X}_{t+1}^{-}, P_{t+1}^{-} \right)$ shall be computes in two steps. \\
 
-\begin{align*}
-& Df = Dw_{7} = D(w_{5} + w_{6}) = Dw_{5} + Dw_{6} \\
-& Dw_{6} = D\dfrac{w_{1}}{w_{2}} = \dfrac{w_{1}Dw_{2}- w_{2}Dw_{1}}{w_{2}^{2}}  \\
-& Dw_{5} = Dw_{3}w_{4} = w_{3}Dw_{4} + w_{4}Dw_{3} \\
-& Dw_{4} = D\sin(w_{2}) = \cos(w_{2}) Dw_{2} \\
-& Dw_{3} = D\cos(w_{1}) = -\sin(w_{1}) Dw_{1} \\
-& Dw_{2} = Dy \\
-& Dw_{1} = Dx 
-\end{align*}
+\underline{Measurement update step:} Since $Z_{t} = H_{t} X_{t} + \mathbf{v}_{t}$, then the conditional vector $\left( \binom{X_{t}}{Z_{t}}  | \tilde{Z}_{t-1} \right)$ is Gaussian, with mean:
 
-The final value of $Df$ depends only on $x, y, Dw_{1}, Dw_{2}$. In this case, $ D = \dfrac{\partial f}{\partial x}$, so $Dx = 1$ and $Dy = 0$. Because information flows in the same direction as when one evaluates the expression (bottom-up), it is called the \textit{forward mode}. Predictably, the information flows top-down in  \textit{backward mode}, also called \textit{reverse mode}.
+\begin{align}
+\left[\begin{array}{c}
+\hat{X}_{t}^{-} \\
+H_{t} \hat{X}_{t}^{-}
+\end{array}\right]
+\end{align}
 
-\subsection{Backward mode}
+and covariance:
 
-Reverse mode automatic differentiation lets calculate gradients much more efficiently than forward mode automatic differentiation. Suppose one wants to calculate the gradient:
+\begin{align}
+\left[\begin{array}{cc}
+P_{t}^{-} & P_{t}^{-}H_{t}^{T} \\
+H_{t}P_{t}^{-} & M_{t}
+\end{array}\right]
+\end{align}
 
-\[ \triangledown f = \left<\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}\right> = \left<\frac{\partial w_{7}}{\partial w_{1}}, \frac{\partial w_{7}}{\partial w_{2}}\right> \]
+where:
 
-Then:
+\begin{align}
+M_{t} = H_{t} P_{t}^{-} H_{t}^{T} + R_{t}
+\end{align}
 
-\begin{align*}
-& \frac{\partial w_{7}}{\partial w_{1}} = \frac{\partial w_{3}}{\partial w_{1}} \frac{\partial w_{7}}{\partial w_{3}} + \frac{\partial w_{6}}{\partial w_{1}} \frac{\partial w_{7}}{\partial w_{6}} = -\sin w_{1} \frac{\partial w_{7}}{\partial w_{3}} + \frac{1}{w_{2}} \frac{\partial w_{7}}{\partial w_{6}} \\
-& \frac{\partial w_{7}}{\partial w_{2}} = \frac{\partial w_{4}}{\partial w_{2}} \frac{\partial w_{7}}{\partial w_{4}} + \frac{\partial w_{6}}{\partial w_{2}} \frac{\partial w_{7}}{\partial w_{6}} = \cos w_{2} \frac{\partial w_{7}}{\partial w_{4}} - \frac{w_{1}}{w_{2}^{2}} \frac{\partial w_{7}}{\partial w_{6}} \\
-& \frac{\partial w_{7}}{\partial w_{3}} = \frac{\partial w_{5}}{\partial w_{3}} \frac{\partial w_{7}}{\partial w_{5}} = w_{4} \frac{\partial w_{7}}{\partial w_{5}} \\
-& \frac{\partial w_{7}}{\partial w_{4}} = \frac{\partial w_{5}}{\partial w_{4}} \frac{\partial w_{7}}{\partial w_{5}} = w_{3} \frac{\partial w_{7}}{\partial w_{4}} \\
-& \frac{\partial w_{7}}{\partial w_{5}} = 1 \\
-& \frac{\partial w_{7}}{\partial w_{6}} = 1
-\end{align*}
+To compute $\left(X_{t} |  \tilde{Z}_{t} \right)$, it is sufficient to apply the formula for conditional expectation of Gaussian random variable, with everything pre-conditioned on $\tilde{Z}_{t-1}$. In other words, it follows that $\left(X_{t} |  \tilde{Z}_{t} \right)$ is Gaussian with mean:
 
-Instead of using the chain rule to find derivatives of parents in terms of derivatives of their children, one finds derivatives of children nodes in terms of their parents. Because information flows top-down, the reverse of normal evaluation, it is called the \textit{reverse mode} automatic differentiation.
+\begin{align}
+\hat{X}_{t}^{+} = \mathbb{E} (X_{t} | \tilde{Z}_{t} ) = \hat{X}_{t}^{-} + P_{t}^{-} H_{t}^{T} \left(M_{t} \right)^{-1} \left(Z_{t} - H_{t} \hat{X}_{t}^{-} \right)
+\end{align}
 
-Notice that  all operations in reverse mode differentiation are scalar operations, even though one calculates the (vector) gradient. Computing gradients via reverse mode can be thus significantly faster if $f$ contains a vast number of input variables.
+and covariance:
 
-\section{Tensor platform}
+\begin{align}
+P_{t}^{+} = \mathbb{C} (X_{t} | \tilde{Z}_{t} ) = P_{t}^{-} - P_{t}^{-} H_{t}^{T}\left(M_{t} \right)^{-1} H_{t} P_{t}^{-}
+\end{align}
 
-PyTorch is a relatively new deep learning library which support dynamic computation graphs and tensors which can tap into the resources of a GPU to significantly speed up matrix operations. The dynamic graph paradigm allows to make changes to the model architecture during runtime, as a graph is created only when a piece of code is run. This means a graph may be redefined during the lifetime for a program. This, however, is not possible with static graphs, used by another popular deep learning libraryTensorFlow, where graphs are created before running the program, and merely executed later. 
+\underline{Time update step:} Recall that $X_{t} = F_{t} X_{t-1} + G_{t} \mathbf{u}_{t}$ and that $X_{t}$ and $ \mathbf{u}_{t}$ are independent given $\tilde{Z}_{t}$. Therefore:
 
-Finally, PyTorch has in-built several optimization algorithms, such as Stochastic Gradient Descent or ADAM, which solves the likelihood maximization problem relatively costlessly.
+\begin{align}
+\hat{X}_{t+1}^{-} &= \mathbb{E} (X_{t+1} | \tilde{Z}_{t} ) = F_{t} \hat{X}_{t}^{+} \\
+P_{t+1}^{-} &= \mathbb{C} (X_{t+1} | \tilde{Z}_{t} ) = F_{t} P_{t}^{+} F_{t}^{T} + G_{t}Q_{t}G_{t}^{T}
+\end{align} 
+
+\section{Maximum likelihood}
+
+Since, by construction, the forecast error from the Kalman filter is serially uncorrelated and normally distributed, it is relatively straightforward to deliver the log-likelihood (\citet{ireland2004method}). What is more, the obtained likelihood is differentiable, which enables the implementation of Automatic Differentiation in the maximization process, which in turn yields consistent and asymptotically normal estimates.
+
+The Kalman filter allows the construction of inferences about the unobserved state vector and permits the evaluation of the joint likelihood function of observable endogenous variables. Moreover, the so-obtained likelihood becomes a differentiable functions of its parameters, allowing to implement the machine learning techniques described in Chapter \ref{MachineLearning}.
+
+Nevertheless, as pointed out by \citet{fernandez2010econometrics}, maximizing the likelihood of the DSGE models, which in fact is a complicated and highly-dimensional function, is a tedious task. Moreover, due to the sparsity of the macroeconomics, usually quarterly data, as well as he flexibility of DSGE models in generating similar behavior with relatively different combination of parameter values, the likelihoods of DSGE models are full of local extrema and of virtually flat surfaces, which further overburden the optimization. Finally, the standard errors of the estimates are notably problematic to calculate and their asymptotic distribution inadequately approximates the small sample one. To deal some of the above-mentioned obstacles, the Bayesian interference can be introduced, as in the estimation of the \citet{smets2003estimated}.
+
+\section{Stochastic Gradient Descent}
+
+The computational ramification of learning algorithm becomes the decisive restricting factor when one envisions large scale machine learning problems. One of the most esteemed optimization algorithms is called Stochastic Gradient Descent (SGD, \citet{robbins1951stochastic}).
+
+Assume that for each example $z = (x, y)$, consisting of an arbitrary input $x$ and scalar output $y$, one can construct the \textit{loss function} $l(\hat{y}, y)$ that evaluates the cost of predicting $\hat{y}$ when the actual value is $y$. The aim is to identify a function $f \in \mathcal{F}$ that minimizes the loss $L(z, w) = l(f_{w}, y)$ averaged on the examples, where $f_{w}$ is the permissible function parametrized by a weight vector $w$. In fact, one desires to average over the unknown distribution $dP(z)$:
+
+\begin{align}
+\mathbf{E} (f) = \int l(f(x), y) dP(z)
+\end{align}
+
+when only the average on the sample $z_{1}, \ldots, z_{n}$ is available:
+
+\begin{align}
+\mathbf{E}_{n} = \frac{1}{n} \sum\limits_{i=1}^{n} l(f(x_{i}), y_{i})
+\end{align}
+
+The \textit{empirical risk} $\mathbf{E}_{n}$ measures the training set performance. The \textit{expected risk} $\mathbf{E} (f)$ regulates the generalization performance, defined as the expected performance on future examples. The statistical learning theory (\citet{vapnik2015uniform}) countenances minimizing the empirical risk instead of the expected one when the selected family F is sufficiently restrictive.
+
+It has repeatedly been suggested (\citet{rumelhart1985learning}) to minimize the empirical risk $\mathbf{E} (f_{w})$ using Gradient Descent (GD). Each iteration updates the weights $w$ on the basis of the gradient of $\mathbf{E}_{n} (f_{w})$:
+
+\begin{align}
+w_{t+1} = w_{t} - \gamma \frac{1}{n} \sum\limits_{i=1}^{n} \nabla_{w} L(z_{i}, w_{t})
+\end{align}
+
+where $\gamma$ is a competently chosen learning rate. Under sufficient regularity assumptions, when the initial estimate $w_{0}$ is close enough to the optimum and when the learning rate $\gamma$ is amply modest, this algorithm accomplishes linear convergence (\citet{dennis1996numerical}).
+
+The Stochastic Gradient Descent (SGD) algorithm is a drastic simplification. Instead of computing the gradient of $\mathbf{E}_{n} (f_{w})$ exactly, each iteration estimates it on the basis of a single randomly picked example $z_{i}$:
+
+\begin{align}
+w_{t+1} = w_{t} - \gamma \nabla_{w} L(z_{i}, w_{t})
+\end{align}
+
+As a result, SGD is far less computationally demanding than GD. On the other hand, although SGD minimizes loss faster, it is noisier and it oscillates around the the minimum giving some variation in accuracy and loss run to run (\citet{bottou2012stochastic}).
 
 \chapter{Results}
 
-Here go the results.
+The small-sample properties of Maximum Likelihood estimator augmented with machine learning are studied here using Monte Carlo analysis .All experiments are based on 100 replications using a sample size of 200 observations, corresponding to the set of quarterly observations of the series for a period of 50 years. In order to restrict the impact of the initial values used to generate the series, 100 extra observations were produced in every single replication. Then, for the estimation part, the starting 100 observations were repealed.
 
+In order to limit the computational burden in the Monte Carlo experiments, the author concentrates on up to five (of the thirty two) model parameters, namely discount rate, Calvo prices stickiness, standard deviation of government spending shock, capital income share and depreciation rate, keeping the rest fixed. The parameters values used for the simulation are presented in Table \ref{True_par_values}.
+
+\newpage
+
+\begin{table}[H]
+\centering
+\caption[True parameters values]{True parameters values}
+    \label{True_par_values}
+\small{
+\begin{tabular}{@{}| c | l | c |@{}}
+\multicolumn{3}{l}{Behavioral parameters} \\
+\midrule
+$\psi$ & Investment adjustment cost & 1/0.169 \\
+$\sigma_L$ & Labour utility & 2.4 \\
+$\sigma_c$ & Consumption utility & 1.353 \\
+$h$ & Consumption habit & 0.573 \\
+$\phi$ & Fixed cost & 1.408 \\
+$adj$ & Capital utilization adjustment cost & 1/6.771 \\
+$\beta$ & Discount factor & 0.99 \\
+\midrule
+\multicolumn{3}{l}{}  \\
+\multicolumn{3}{l}{Wage and prices parameters}\\
+\midrule
+$\gamma_p$ & Indexation prices & 0.469 \\
+$\gamma_w$ & Indexation wages & 0.763 \\
+$\varsigma_{p}$ & Calvo prices & 0.908 \\
+$\varsigma_{w}$ & Calvo wages & 0.737 \\
+\midrule
+\multicolumn{3}{l}{}  \\
+\multicolumn{3}{l}{Monetary policy function parameters} \\
+\midrule
+$r_\pi$ & Inflation & 1.684 \\
+$r_{d\pi}$ & Difference of inflation & 0.14 \\
+$r_Y$ & Output & 0.099 \\
+$r_{dY} $ & Difference of output & 0.159 \\
+$\lambda_w$ & Calvo employment & 0.5 \\
+$\rho$ & Lagged interest rate & 0.961 \\
+\midrule
+\multicolumn{3}{l}{}  \\
+\multicolumn{3}{l}{Persistence of shocks} \\
+\midrule
+$\rho_L$ & Labour supply shock & 0.889 \\
+$\rho_a$ & Productivity shock & 0.823 \\
+$\rho_b$ & Consumption preference shock & 0.855 \\
+$\rho_G$ & Government spending shock & 0.949 \\
+$\rho_\pi$ & Inflation objective shock & 0.924 \\
+$\rho_I$ & Investment shock & 0.927 \\
+\midrule
+\multicolumn{3}{l}{}  \\
+\multicolumn{3}{l}{Innovations of the shock} \\
+\midrule
+$sd_R$ & Interest rate shock & 0.081 \\
+$sd_p$ & Price mark-up shock & 0.16 \\
+$sd_w$ & Wage mark-up shock & 0.289 \\
+$sd_Q$ & Equity premium shock & 0.604 \\
+\midrule
+\multicolumn{3}{l}{}  \\
+\multicolumn{3}{l}{Other parameters} \\
+\midrule
+$\tau$ & Depreciation rate & 0.025 \\
+$\alpha$ & Capital income share & 0.3 \\
+$r_k$ & Rental rate of capital & 0.078 \\
+$k$ & Steady state capital-output ratio & 8.8 \\
+$g$ & Steady state government spending-output ratio & 0.18 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Moreover, as the maximum likelihood algorithm requires the initial guess for the estimated parameters, the draws from following intervals, widely accepted in the DSGE literature, are considered:
+
+\begin{table}[H]
+\centering
+\caption[Intervals for initial guess of parameters values]{Initial guesses of parameters values}
+    \label{Initial_par_values}
+\begin{tabular}{@{}| c | l | c | c |@{}}
+\toprule
+Parameter & Description & Lower bound & Upper bound \\
+\midrule
+$\beta$ & Discount factor & 0.90 & 0.99 \\
+$\varsigma_{p}$ & Calvo prices & 0.90 & 0.99 \\
+$\rho_G$ & Government spending shock & 0.90 & 0.99 \\
+$\alpha$ & Capital income share & 0.2 & 0.4 \\
+$\tau$ & Depreciation rate & 0.025 & 0.05 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Moreover, due to the suspicion of the existence of local maxima, the multiple starting points are selected during each iteration and the final value is chosen as one maximizing the obtained likelihoods.
+
+\section{Preeliminary results}
+
+Before conducting the main Monte Carlo analysis, the author decided to test the algorithm on the estimation of one specific parameter: the discount factor. Being more specific, it is useful to test the dependance on the initial guess matrix in the Linear Time Iteration algorithm, with particular emphasis imposed on the duration of the execution and its closeness to the real parameter value. Moreover, it is beneficial to verify the reliance on the performed number of optimization steps, as well as the amount of starting values used in the calculations. 
+
+\begin{table}[!htbp] \label{Beta_stress}
+\centering
+\caption{Beta estimation stress testing}
+\begin{tabularx}{\textwidth}{@{} M *{3}{Y} M M L  @{}}
+\toprule
+F matrix & $n_{start}$ & $n_{opt}$ & $\beta$ & Std. Error & Time
+\\ \midrule
+Zeros              & 100                          & 100                       &     0.9893     &           3.9111e-09                         &                                          11 100s  ($\sim$ 3h)       \\
+Zeros              & 1000                         & 100       &    0.9893            &                           3.8888e-09                   &                                    113 100s  ($\sim$ 31h)     \\
+Zeros              & 100                          & 1000                      &   0.9894       &               2.9755e-09                     &                     75 600s    ($\sim$ 24h)                          \\
+Correct F          & 100                          & 100                       &     0.9894     &         6.2042e-09                           &                              7 800s         ($\sim$ 2h)               \\
+Correct F          & 1000                         & 100                       &     0.9894     &                 4.6190e-09                   &                                  77 100s          ($\sim$ 22h)           \\
+Correct F          & 100                          & 1000                      &        0.9896  &           3.8645e-09                            &                                                79 400s ($\sim$ 22h)                   \\ \bottomrule
+\end{tabularx}
+\caption*{\small{Where the columns denote respectively guessed matrix $F$, number of starting points, number of optimization steps, $\beta$ estimate, standard error and execution time.}}
+\end{table}
+
+The maximization of likelihood function during the scenarios listed in Table \ref{Beta_stress} points out that even the elementary scheme with 100 optimization steps and exactly the same number of starting points can lead to the acceptable estimate. Moreover, the results clearly promotes the implementation of F matrix with true parameters as the initial guess in the Linear Time Iteration algorithm, thus the same technique is adopted in the Monte Carlo analysis.
+
+On the other hand, the standard errors, also reported in Table \ref{Beta_stress}, correspond to the square roots of the diagonal elements of negative of the inverted matrix of second derivatives of the maximized log-likelihood function. Generally, calculating these standard errors requires two steps, numerically evaluating the matrix of second derivatives of the log-likelihood function and then inverting that very large matrix having elements of varying magnitudes, both of which may introduce approximation error into the statistics (\citet{iskrev2008evaluating}). In spite of the fact that the automatic differentiation procedure provides the Hessian matrix relatively costlessly, significantly reducing the computational tine, its inversion still may be problematic. Hence, these standard errors, though useful, do need to be interpreted with a bit of caution.
+
+Finally, increasing both the amount of optimization steps and the number of starting points lead directly to the better estimate, simultaneously dramatically increasing the computational time. Therefore, the elementary scheme (100, 100) should be firstly considered to be adopted in the Monte Carlo analysis. Nonetheless, in furtherance of performing at least 100 Monte Carlo trials, the amount of starting points is diminished to 10.
+
+\section{Monte Carlo results}
+
+In the following section the results of 100 Monte Carlo trials of estimation of the DSGE model in different scenarios are illustrated. Similar scheme to the previous chapter is the first to consider, namely 100 Monte Carlo trials of discount factor estimation performed with 10 starting points and 100 optimization steps.
+
+\begin{figure}[H] \centering
+\includegraphics[width=\textwidth]{Hist_1}
+\caption[Histogram of one parameter estimation]{Histogram of one parameter estimation}
+\label{Hist_1}
+\end{figure} 
+
+The histogram \ref{Hist_1} confirms that the implemented estimation method lead to the relevant results, nevertheless as can be observed in the upper part of Table \ref{True_par_values} it demands a significant portion of time and computational power.
+
+\begin{table}[!htbp]
+\centering
+\caption[Results of estimation]{Results of estimation}
+    \label{Results}
+\begin{tabularx}{\textwidth}{@{} | Y Y Y Y  M  | @{}}
+\multicolumn{5}{l}{Single parameter estimation} \\
+\midrule
+Parameter & True value & Estimation & Std. Error  & Time \\
+\midrule
+$\beta$ & 0.99 &  0.9878 & 1.5356e-09 &  750s ($\sim$ 0.20h) \\
+\midrule
+\multicolumn{5}{l}{}  \\
+\multicolumn{5}{l}{Three parameters estimation}\\
+\midrule
+Parameter & True value & Estimation & Std. Error & Time \\
+\midrule
+$\beta$ & 0.99&  0.9872 & 2.4556e-09 & 900s ($\sim$ 0.25h) \\
+$\varsigma_p$ & 0.908 &0.9650  &7.3073e-09 &\\
+$\rho_G$  & 0.949 & 0.9759 &4.6946e-09 &\\
+\midrule
+\multicolumn{5}{l}{}  \\
+\multicolumn{5}{l}{Five parameters estimation} \\
+\midrule
+Parameter & True value & Estimation & Std. Error  & Time \\
+\midrule
+$\beta$ & 0.99& 0.9833 & 2.6776e-09 & 1500s ($\sim$ 0.30 h) \\
+$\varsigma_{p}$& 0.908  & 0.9674 & 8.0667e-09 & \\
+$\rho_G$ &  0.949 & 0.9678 & 5.8213e-09 &\\
+$\alpha$ &  0.3 & 0.3983 &1.8797e-09 &\\
+$\tau$ & 0.025 & 0.0309 & 1.3171e-09  &\\
+\bottomrule
+\end{tabularx}
+\caption*{\small{Where the columns denote respectively the parameter name, mean estimate, average standard error and average execution time (per one Monte Carlo iteration).}}
+\end{table}
+
+As the next step, the Monte Carlo trials with identical framework are performed, trying to estimate three and five parameters at once respectively. It can be observed that the $\beta$ estimate is further from the true value, pointing out that the convergence in higher dimensional space is much more difficult to obtain in the same amount of steps. Moreover, the obtained values are wider spread, as can be deducted from the inspection of Figure \ref{Hist_3}. Similarly, the average estimates of two other parameters, namely $\varsigma_{p}$ and $\rho_G$ are far from optimal, while the computational time increases significantly.
+
+\begin{figure}[!htbp] \centering
+\includegraphics[width=\textwidth]{Hist_3}
+\caption[Histograms of three parameters estimation]{Histograms of three parameters estimation}
+\label{Hist_3}
+\end{figure} 
+
+\newpage
+
+Finally, the simultaneous estimation of five parameters confirms all of the above-mentioned findings. Particularly important is the time dimension, which significant in absolute value, does not increases linearly. In other words, one may assume that the estimation procedure outlined in the paper should be especially considered in the high-dimensional estimation problems.
+
+\begin{figure}[H] \centering
+\includegraphics[width=\textwidth]{Hist_all}
+\caption[Histograms of five parameters estimation]{Histograms of five parameters estimation}
+\label{Hist_all}
+\end{figure} 
+
+It has to be accentuated that the choice of observable variables employed in Maximum Likelihood estimation matters (\citet{ruge2007methods}). Therefore replication of the performed exercise with different set of observables may be seen as a potential extension. Nevertheless, the obtained results clearly indicates that the Machine-Learning-enhanced Maximum Likelihood estimation of the DSGE model should be considered as a helpful alternative to the Bayesian frameworks only in the case of highly-dimensional problems, with a plethora of parameters to estimate.
 
 \chapter{Concluding remarks} \label{Concluding remarks}
 
-Here goes the conclusion.
+With the quick advance on computers verified on the past few years, Dynamic Stochastic General Equilibrium framework became an important tool in macro-analysis. Moreover, recently one can observe an expeditious developments in the Machine Learning domain. Therefore the paper aimed to implement the progressive achievements of ML to the medium-size DSGE model estimation. 
 
-Potential extensions: GPU acceleration, higher approximations
+Performed Monte Carlo analysis evidently demonstrated that the proposed framework can be cogitated as an effective substitute to the Bayesian interference in case of highly- dimensional space parameter estimation. Undoubtedly, the combination of Machine Learning and DSGE models has a great perspectives of growth in the near future.However, there are important gaps and uncertainties that remain to be solved.
+
+Thus, the code implementation on the Graphics Processing Unit can be regarded as a valuable extension, potentially disentangling the speed and memory allocation issues. In other words, rewriting code to be run on the GPU may significantly boost the algorithms performance even 10 times (\citet{michalakes2008gpu}). Moreover, the Maximum Likelihood estimation may surpass the classical Bayesian framework in the case of higher approximations of the solution function, incorporating non-linearities. 
 
 \newpage
 
@@ -1624,6 +2037,40 @@ It follows:
 
 \newpage
 
-\lstinputlisting{SmetsWouters.mod }
+\chapter*{Appendix B} \label{Appendix B}
+\addcontentsline{toc}{chapter}{Appendix B}
+
+\lstinputlisting{SmetsWouters.mod}
+
+\chapter*{Appendix C} \label{Appendix C}
+\addcontentsline{toc}{chapter}{Appendix C}
+
+\section*{DSGE estimation}
+
+\lstinputlisting{DSGE_PyTorch.py}
+
+\newpage
+
+\section*{Loss function}
+
+\lstinputlisting{Loss_function_PyTorch.py}
+
+\newpage
+
+\section*{DSGE solution}
+
+\lstinputlisting{Solution_function_PyTorch.py}
+
+\newpage
+
+\section*{Kalman filter}
+
+\lstinputlisting{Kalman_PyTorch.py}
+
+\newpage
+
+\section*{Linear Time Iteration algorithm}
+
+\lstinputlisting{Linear_Time_Iteration_PyTorch.py}
 
 \end{document}

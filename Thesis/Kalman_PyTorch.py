@@ -7,6 +7,7 @@ from textwrap import dedent
 import math
 import torch
 
+
 class Kalman:
     """
     Implements the Kalman filter for the Gaussian state space model
@@ -61,7 +62,6 @@ class Kalman:
 
         self.R = mm(self.H, t(self.H))
 
-
     def __repr__(self):
         return self.__str__()
 
@@ -80,11 +80,12 @@ class Kalman:
         y : scalar or array_like(float)
             The current measurement
         """
-        # === simplify notation === #
+
+        # Simplify notation
         G, H = self.G, self.H
         R = mm(H, t(H))
 
-        # === and then update === #
+        # Update
         E = mm(self.Sigma, t(G))
         F = mm(mm(G, self.Sigma), t(G)) + R
         M = mm(E, inverse(F))
@@ -97,11 +98,12 @@ class Kalman:
         moments of the predictive distribution, which becomes the time
         t+1 prior
         """
-        # === simplify notation === #
+
+        # Simplify notation
         A, C = self.A, self.C
         Q = mm(C, t(C))
 
-        # === and then update === #
+        # Update
         self.x_hat = mm(A, self.x_hat)
         self.Sigma = mm(A, mm(self.Sigma, t(A))) + Q
 
@@ -135,8 +137,8 @@ class Kalman:
         """
 
         eta = y - mm(self.G, self.x_hat)  # forecast error
-        P = mm(self.G, mm(self.Sigma, t(self.G))) + self.R # covariance matrix of forecast error
-        logL = - (y.shape[0] * log(2*torch.tensor(math.pi)) + log(abs(det(P))) + torch.sum(mm(t(eta), mm(inverse(P), eta))))/2
+        P = mm(self.G, mm(self.Sigma, t(self.G))) + self.R  # covariance matrix of forecast error
+        logL = - (y.shape[0] * (log(2*torch.tensor(math.pi)) + log(abs(det(P)))) + torch.sum(mm(t(eta), mm(inverse(P), eta))))/2
         return logL
 
     def compute_loglikelihood(self, y):
@@ -151,9 +153,11 @@ class Kalman:
         """
         T = y.shape[1]
         logL = 0
-        # forecast and update
-        for t in range(1, T):
-            logL = logL + self.log_likelihood(y[:, t])
-            self.update(y[:, t])
-        return logL
 
+        # Forecast and update
+
+        for period in range(1, T):
+            logL = logL + self.log_likelihood(y[:, period-1])
+            self.update(y[:, period-1])
+
+        return logL

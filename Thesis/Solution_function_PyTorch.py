@@ -5,14 +5,14 @@ Final version written by Michal Miktus, April 2019
 
 from torch import zeros, cat, eye
 from Linear_Time_Iteration_PyTorch import Linear_Time_Iteration
-import pickle
 
-def Solution(betta = 0.99, tau = 0.025, alphaa = 0.3, psi = 1/0.169, gamma_p = 0.469,
-             gamma_w = 0.763, lambda_w = 0.5, xi_p = 0.908, xi_w = 0.737, sigma_L = 2.4,
-             sigma_c = 1.353, h = 0.573, phi = 1.408, adj = 1/6.771,
-             k = 8.8, g = 0.18, r_dpi = 0.14, r_Y = 0.099, r_dY = 0.159, rho = 0.961, r_pi = 1.684,
-             rho_L = 0.889, rho_a = 0.823, rho_b = 0.855, rho_G = 0.949, rho_pi = 0.924, rho_I = 0.927,
-             sd_R = 0.081, sd_p = 0.16, sd_w = 0.289, sd_Q = 0.604):
+
+def Solution(F_initial=zeros((31, 31)), betta=0.99, tau=0.025, alphaa=0.3, psi=1/0.169, gamma_p=0.469,
+             gamma_w=0.763, lambda_w=0.5, xi_p=0.908, xi_w=0.737, sigma_L=2.4,
+             sigma_c=1.353, h=0.573, phi=1.408, adj=1/6.771,
+             k=8.8, g=0.18, r_dpi=0.14, r_Y=0.099, r_dY=0.159, rho=0.961, r_pi=1.684,
+             rho_L=0.889, rho_a=0.823, rho_b=0.855, rho_G=0.949, rho_pi=0.924, rho_I=0.927,
+             sd_R=0.081, sd_p=0.16, sd_w=0.289, sd_Q=0.604):
 
     r_k = (1 / betta) - 1 + tau
 
@@ -268,15 +268,14 @@ def Solution(betta = 0.99, tau = 0.025, alphaa = 0.3, psi = 1/0.169, gamma_p = 0
     # --- Matrix form in spirit of Linear Time Iteration
     # --------------------------------------------------------------------------
 
-    A = cat((cat((matrix_names[1], zeros((ny, ny)), zeros((ny,nz))), 1), cat((matrix_names[6], zeros((nx, ny)), zeros((nx, nz))), 1),
-             cat((zeros((nz,nx)), zeros((nz,ny)), matrix_names[11]), 1)), 0)
+    A = cat((cat((matrix_names[1], zeros((ny, ny)), zeros((ny, nz))), 1), cat((matrix_names[6], zeros((nx, ny)), zeros((nx, nz))), 1),
+             cat((zeros((nz, nx)), zeros((nz, ny)), matrix_names[11]), 1)), 0)
     B = cat((cat((matrix_names[0], matrix_names[2], matrix_names[3]), 1), cat((matrix_names[5], matrix_names[8], matrix_names[10]), 1),
              cat((zeros((nz, nx)), zeros((nz, ny)), -eye((nz))), 1)), 0)
     C = cat((zeros((ny, nx + ny+nz)), cat((matrix_names[4], matrix_names[7], matrix_names[9]), 1), zeros((nz, nx+ny+nz))), 0)
 
-    # with open('MatricesABC_values.pickle', 'wb') as f:
-    #     pickle.dump([A, B, C], f)
+    F_iter, Q_iter = Linear_Time_Iteration(A, B, C, F_initial, 1e-16, 1e-4)
 
-    F_iter, Q_iter = Linear_Time_Iteration(A, B, C, 1e-16, 1e-4)
+    Q_iter = Q_iter[:, -10:]
 
     return F_iter, Q_iter, nx, ny, nz
