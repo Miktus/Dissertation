@@ -734,7 +734,7 @@ Since \citet{blanchard1980solution} a significant amount of substitutable approa
 
 \section{\citet{klein2000using} approach}
 
-DSGE model consists of state variables ($x_{t}$), control variables ($y_{t}$), transition equations for structural shocks and measurement errors ($\varepsilon_{t}$) and a vector of deep parameters $\theta$, which can be injected into a nonlinear first-order system of expectational difference equations:
+DSGE model consists of state variables ($x_{t}$), control variables ($y_{t}$), transition equations for structural shocks and measurement errors ($ \mathbf{u}_{t}$) and a vector of deep parameters $\theta$, which can be injected into a nonlinear first-order system of expectational difference equations:
 
 \begin{align}
 \mathbb{E}_{t}f\left(x_{t+1},y_{t+1},x_{t},y_{t} | \, \theta \right) = 0
@@ -745,7 +745,7 @@ Solution is then characterized by transition equations for state and control var
 \begin{align}
 \left\{
 \begin{array}{cl}
-x_{t+1} &= \widetilde{h} \left( x_{t} | \, \theta \right) + \eta_{x} \left( \theta \right) \varepsilon_{t+1} \\
+x_{t+1} &= \widetilde{h} \left( x_{t} | \, \theta \right) + \eta_{x} \left( \theta \right) \mathbf{u}_{t+1} \\
 y_{t} &= \widetilde{g} \left( x_{t} | \, \theta \right)
 \end{array}
 \right.
@@ -757,13 +757,13 @@ Unfortunately, in the majority of cases the analytical derivation of $g$ and $h$
 \left\{
 \begin{array}{cl}
 0 &= \mathbb{E}_{t}f\left(x_{t+1},y_{t+1},x_{t},y_{t} | \, \theta \right) \\
-x_{t+1} &= h \left( x_{t}, \sigma | \, \theta \right) + \sigma \eta_{x} \varepsilon_{t+1} \\
+x_{t+1} &= h \left( x_{t}, \sigma | \, \theta \right) + \sigma \eta_{x} \mathbf{u}_{t+1} \\
 y_{t} &= g \left( x_{t}, \sigma | \, \theta \right)
 \end{array}
 \right.
 \end{align}
 
-with $\mathbb{E}(\varepsilon_{t}) = 0$ and $\mathbb{E}(\varepsilon_{t} \varepsilon_{t}^{'} ) = \Sigma_{\varepsilon}$. The non-stochastic steady state is then defined as:
+with $\mathbb{E}(\mathbf{u}_{t}) = 0$ and $\mathbb{E}(\mathbf{u}_{t} \mathbf{u}_{t}^{'} ) = \Sigma_{\mathbf{u}}$. The non-stochastic steady state is then defined as:
 
 \begin{align}
 \left\{
@@ -775,7 +775,7 @@ with $\mathbb{E}(\varepsilon_{t}) = 0$ and $\mathbb{E}(\varepsilon_{t} \varepsil
 \right.
 \end{align}
 
-where exogenous shocks and measurement errors are stacked into $\varepsilon_{t}$ for convenience.
+where exogenous shocks and measurement errors are stacked into $\mathbf{u}_{t}$ for convenience.
 
 As far as the first-order approximations of $g$ and $h$ around the point $(x_{t}, \sigma) = (\bar{x}, 0)$ are concerned:
 
@@ -791,13 +791,13 @@ h(x_{t}, \sigma) = h(\bar{x}, 0) + h_{x}(\bar{x}, 0)(x_{t} - \bar{x}) + h_{\sigm
 Substituting into the model:
 
 \begin{align}
-F(x_{t}, \sigma) = \mathbb{E}_{t} f \left( \underbrace{h(x_{t}, \sigma) + \sigma \varepsilon_{t+1}}_{x_{t+1}}, \underbrace{g \left( \overbrace{h\left(x_{t}, \sigma \right) + \sigma \varepsilon_{t+1}}^{x_{t+1}}, \sigma \right)}_{y_{t+1}}, x_{t}, \underbrace{g(x_{t}, \sigma)}_{y_{t}} \right)
+f^{e}(x_{t}, \sigma) = \mathbb{E}_{t} f \left( \underbrace{h(x_{t}, \sigma) + \sigma \mathbf{u}_{t+1}}_{x_{t+1}}, \underbrace{g \left( \overbrace{h\left(x_{t}, \sigma \right) + \sigma \mathbf{u}_{t+1}}^{x_{t+1}}, \sigma \right)}_{y_{t+1}}, x_{t}, \underbrace{g(x_{t}, \sigma)}_{y_{t}} \right)
 \end{align}
 
-After noticing that $f$ and its derivatives are 0 when assessed at the non-stochastic steady state $\left(\bar{x}, 0\right)$, taking derivative of $F$ with respect to $\sigma$ and evaluating at the non-stochastic steady state yields:
+After noticing that $f$ and its derivatives are 0 when assessed at the non-stochastic steady state $\left(\bar{x}, 0\right)$, taking derivative of $f^{e}$ with respect to $\sigma$ and evaluating at the non-stochastic steady state yields:
 
 \begin{eqnarray}
-&F_\sigma(\overline{x},0) = E_t f_1[h_\sigma + \varepsilon_{t+1}] + E_t f_2 [g_x(h_\sigma+ \varepsilon_{t+1})+g_\sigma] + f_3\cdot 0 + f_4 g_\sigma = 0 \nonumber \\
+&f^{e}_\sigma(\overline{x},0) = E_t f_1[h_\sigma + \mathbf{u}_{t+1}] + E_t f_2 [g_x(h_\sigma+ \mathbf{u}_{t+1})+g_\sigma] + f_3\cdot 0 + f_4 g_\sigma = 0 \nonumber \\
  &  \iff \begin{bmatrix} \underset{(n \times n_x)}{f_1 + f_2 g_x} & \underset{(n\times n_y)}{f_2 +f_4}\end{bmatrix} \begin{bmatrix} \underset{(n_x \times 1)}{h_\sigma} \\ \underset{(n_y \times 1)}{g_\sigma} \end{bmatrix} = \underset{(n \times 1)}{0}
   \end{eqnarray}
 
@@ -814,10 +814,10 @@ g_\sigma &= \underset{(n_y \times 1)}{0}
 \right.
 \end{align}
 
-Furthermore, taking derivative of $F$ with respect to $x_t$ and evaluating at the non-stochastic steady state yields:
+Furthermore, taking derivative of $f^{e}$ with respect to $x_t$ and evaluating at the non-stochastic steady state yields:
 
 \begin{eqnarray}
-&    F_x (\overline{x},0) = f_1 h_x + f_2 g_x h_x + f_3 + f_4 g_x = 0 \nonumber \\
+&    f^{e}_x (\overline{x},0) = f_1 h_x + f_2 g_x h_x + f_3 + f_4 g_x = 0 \nonumber \\
 & \iff \underbrace{- \begin{bmatrix} \underset{(n\times n_x)}{f_1} & \underset{(n\times n_y)}{f_2} \end{bmatrix}}_{:=A} \begin{bmatrix} \underset{(n_x\times n_x)}{h_x} \\ \underset{(n_y\times n_x)}{g_x} \underset{(n_x\times n_x)}{h_x} \end{bmatrix}  = \underbrace{\begin{bmatrix} \underset{(n\times n_x)}{f_3} & \underset{(n\times n_y)}{f_4}\end{bmatrix}}_{:=B} \begin{bmatrix} \underset{(n_x\times n_x)}{I} \\\underset{(n_y\times n_x)}{g_x} \end{bmatrix}
 \end{eqnarray}
   
@@ -830,8 +830,14 @@ Therefore there are $n\times n_x$ equations for $n\times n_x$ unknown elements o
 It is useful to discern that the coefficient matrices are tantamount to the first order approximation:
 
 \begin{eqnarray}
-A \mathbb{E}_t\begin{bmatrix} \widehat{x}_{t+1} \\ \widehat{y}_{t+1} \end{bmatrix} = B\begin{bmatrix} \widehat{x}_t\\ \widehat{y}_t \end{bmatrix} + \begin{bmatrix} \sigma \eta_x \varepsilon_{t+1} \\ 0\end{bmatrix}
+A \mathbb{E}_t\begin{bmatrix} \widehat{x}_{t+1} \\ \widehat{y}_{t+1} \end{bmatrix} = B\begin{bmatrix} \widehat{x}_t\\ \widehat{y}_t \end{bmatrix} + \begin{bmatrix} \sigma \eta_x \mathbf{u}_{t+1} \\ 0\end{bmatrix}
 \end{eqnarray}
+
+Alternatively, appropriate stacking leads to the more concise formulation (up to scaling factor):
+
+\begin{align}
+A \mathbb{E}_{t}X_{t+1} = BX_{t} + \mathbf{u}_{t}
+\end{align}
 
 If $A$ and $B$ are known matrices, then undoubtedly inverting $A$ yields solution for $h_x$ and $g_x$. Moreover, $A$ is generally singular and non-invertible. \cite{klein2000using} approach to approximate the first order solution employing the generalized Schur decomposition is therefore implemented, in order to uncouple system into a (block) triangular system of equations and solve system recursively.
  
@@ -942,7 +948,7 @@ Furthermore, given the fact that $u_t=0$, both $x_t$ and $y_t$ from the definiti
   \end{cases}
 \end{align}
 
-If $Z_{11}$ is nondegenerate, then:
+If $Z_{11}$ is non-degenerate, then:
 
 \begin{align}
   y_t = \underbrace{Z_{21} Z_{11}^{-1}}_{=g_x} x_t
@@ -991,98 +997,92 @@ Note that the squareness of $Z_{11}$ is referred to in the literature as the \ci
 The \citet{uhlig1998toolkit} algorithm likewise employs generalized eigenvalue calculations to glean a solution for the matrix polynomial equation, based on the method of undetermined coefficients. The method is applied to systems written as:
 
 \begin{align}
-0 &= Ax' + Bx + Cy + Dz \nonumber \\
-0 &=\mathbb{E} \left[Fx'' + Gx' + Hx + Jy' + Ky + Lz' + Mz \right] \nonumber \\
-z' &= Nz + \varepsilon'
+0 &= U_{1}x_{t} + U_{2}x_{t-1} + U_{3}y_{t-1} + U_{4}z_{t-1} \nonumber \\
+0 &=\mathbb{E}_{t} \left[U_{5}x_{t+1} + U_{6}x_{t} + U_{7}x_{t-1} + U_{8}y_{t} + U_{9}y_{t-1} + U_{10}z_{t} + U_{11}z_{t-1} \right] \nonumber \\
+z_{t} &= U_{12}z_{t-1} +  \mathbf{u}_{t}
 \end{align}
 
-where $x$ are the endogenous state variables, $y$ the endogenous control (also called \textit{jump}) variables, while $z$ denotes the exogenous variables. Moreover, the apostrophe stands for the leading operator.
-
-Assuming that the decision rules can be expressed as:
+where $x_{t}$ are the endogenous state variables, $y_{t}$ the endogenous control (also called \textit{jump}) variables, while $z_{t}$ denotes the exogenous variables. Moreover, the apostrophe stands for the leading operator. Alternatively, in the stacked formulation:
 
 \begin{align}
-x' &= Px + Qz \nonumber \\
-y &= Rx + Sz
-\end{align}
-
-one can substitute the decision rules into the system:
-
-\begin{align}
-0 &= (AP+B+CR)x+(AQ+CS+D)z \nonumber \\
-0 &= (GP+H+JRP+KR)x+(GQ+JRQ+JSN+KS+M)z
-\end{align}
-
-Since these equations must hold for any $x$ and $z$:
-
-\begin{align}
-0 &= AP+B+CR  \label{Uhlig1} \\
-0 &= AQ+CS+D  \label{Uhlig2} \\
-0 &= GP+H+JRP+KR  \label{Uhlig3} \\
-0 &= GQ+JRQ+JSN+KS+M \label{Uhlig4}
-\end{align}
-
-Solving \ref{Uhlig1} for $R$:
-
-\begin{align}
-R = -C^{-1} \left(AP + B \right)
-\end{align}
-
-Substituting it for R into equation \ref{Uhlig3}:
-
-\begin{align}
--JC^{-1}AP^{2} - \left(JC^{-1}B + KC^{-1}A - G \right)P - \left(KC^{-1}B - H \right) = 0
-\end{align} 
-
-The above-mentioned quadratic matrix equation in $P$ can be then solved by generalized Schur decomposition. Next, solving for $S$ as the function of $Q$ with \ref{Uhlig2}:
-
-\begin{align}
-S = -C^{-1} \left(AQ + D \right)
-\end{align}
-
-Substituting further in \ref{Uhlig4}
-
-\begin{align}
-GQ+JRQ-JC^{-1} (AQ+D)N - KC^{-1} (AQ+D)+M &= 0 \nonumber \\
-\Rightarrow \left(G + JR - KC^{-1}A \right)Q - JC^{-1}DN - KC^{-1}D + M &= 0
-\end{align}
-
-Matrix $Q$ is the only unknown, but it is not trivial, as $Q$ is sandwiched. Nevertheless, one can use the Kronecker product $\otimes$ such that $vec \left(XYZ\right) = \left(Z^{T} \otimes X \right) vec(Y)$, applied to \ref{Uhlig4}:
-
-\begin{align}
-0 &= I \otimes \left(G + JR - KC^{-1}A \right) vec(Q) - N^{T} \otimes \left(JC^{-1}A\right) vec(Q) - vec\left(JC^{-1}DN - KC^{-1}D + M \right) \nonumber \\
-& \Rightarrow vec(Q) = \left[ I \otimes \left(G + JR - KC^{-1}A \right) - N^{T} \otimes \left(JC^{-1}A \right)\right]^{-1} vec\left(JC^{-1}DN - KC^{-1}D + M \right)
-\end{align}
-
-It has to be underlined that for the \citet{uhlig1998toolkit} procedure, one must choose \textit{jump} variables to maintain the full rank of $C$ matrix, namely augment the system with a \textit{dummy variable} and respective equations.
-
-Solution of \citet{uhlig1998toolkit} toolkit is a state space system: a transition equation supplemented with a measurement equation. Moreover, it can be viewed as a restricted VAR(1):
-
-\begin{align}
-Y' = B_{1}Y+ B_{0}z
+A\mathbb{E}_{t}X_{t+1} + BX_{t} + CX_{t-1} + \mathbf{u}_{t} = 0
 \end{align}
 
 where:
 
 \begin{align}
-\left\{
-\begin{array}{cl}
-B_{0} &= \begin{bmatrix}
-    SS \\
-    QQ
-\end{bmatrix} \\
-B1 &=  \begin{bmatrix}
-    0 & RR \\
-    0 & PP
-\end{bmatrix} \\
-Y' &= \begin{bmatrix}
-    y' \\
-    x'
-\end{bmatrix}
-\end{array}
-\right.
+X_{t} &=  \begin{bmatrix} x_{t} \\ y_{t} \\ z_{t} \end{bmatrix} \\
+A &= \begin{bmatrix} 0 & 0 & 0 \\ U_{5} & 0 & 0 \\ 0 & 0 & 0 \end{bmatrix} \\
+B &= \begin{bmatrix}  U_{1} & 0 & 0 \\ U_{6} & U_{8} & U_{10} \\ 0 & 0 & I \end{bmatrix} \\
+C &= \begin{bmatrix}  U_{2} & U_{3} & U_{4} \\ U_{7} & U_{9} & U_{11} \\ 0 & 0 & -U_{12} \end{bmatrix} \\
 \end{align}
 
-Finally, it has to be emphasised that the \citet{uhlig1998toolkit} and \citet{klein2000using} solutions are equivalent (\citet{bonaldi2010identification}).
+Assuming that the decision rules can be expressed as:
+
+\begin{align}
+x_{t} &= \tilde{U}_{1}x_{t-1} + \tilde{U}_{2}z_{t-1} \nonumber \\
+y_{t} &= \tilde{U}_{3}x_{t} + \tilde{U}_{4}z_{t}
+\end{align}
+
+%potentially stacked into:
+%
+%\begin{align}
+%X_{t} = FX_{t-1} + G\mathbf{u}_{t} 
+%\end{align}
+
+one can substitute the decision rules into the system:
+
+\begin{align}
+0 &= (U_{1}\tilde{U}_{1}+U_{2}+U_{3}\tilde{U}_{3})x_{t-1}+(U_{1}\tilde{U}_{2}+U_{3}\tilde{U}_{4}+U_{4})z_{t-1} \nonumber \\
+0 &= (U_{6}\tilde{U}_{1}+U_{7}+U_{8}\tilde{U}_{3}\tilde{U}_{1}+U_{9}\tilde{U}_{3})x_{t-1}+(U_{6}\tilde{U}_{2}+U_{8}\tilde{U}_{3}\tilde{U}_{2}+U_{8}\tilde{U}_{4}U_{12}+U_{9}\tilde{U}_{4}+U_{11})z_{t-1}
+\end{align}
+
+Since these equations must hold for any $x_{t-1}$ and $z_{t-1}$:
+
+\begin{align}
+0 &= U_{1}\tilde{U}_{1}+U_{2}+U_{3}\tilde{U}_{3}  \label{Uhlig1} \\
+0 &= U_{1}\tilde{U}_{2}+U_{3}\tilde{U}_{4}+U_{4}  \label{Uhlig2} \\
+0 &= U_{6}\tilde{U}_{1}+U_{7}+U_{8}\tilde{U}_{3}\tilde{U}_{1}+U_{9}\tilde{U}_{3}  \label{Uhlig3} \\
+0 &= U_{6}\tilde{U}_{2}+U_{8}\tilde{U}_{3}\tilde{U}_{2}+U_{8}\tilde{U}_{4}U_{12}+U_{9}\tilde{U}_{4}+U_{11} \label{Uhlig4}
+\end{align}
+
+Solving \ref{Uhlig1} for $\tilde{U}_{3}$:
+
+\begin{align}
+\tilde{U}_{3} = -U_{3}^{-1} \left(U_{1}\tilde{U}_{1} + U_{2} \right)
+\end{align}
+
+Substituting it for $\tilde{U}_{3}$ into equation \ref{Uhlig3}:
+
+\begin{align}
+-U_{8}U_{3}^{-1}U_{1}\tilde{U}_{1}^{2} - \left(U_{8}U_{3}^{-1}U_{2} + U_{9}U_{3}^{-1}U_{1} - U_{6} \right)\tilde{U}_{1} - \left(U_{9}U_{3}^{-1}U_{2} - U_{7} \right) = 0
+\end{align} 
+
+The above-mentioned quadratic matrix equation in $\tilde{U}_{1}$ can be then solved by generalized Schur decomposition. Next, solving for $\tilde{U}_{4}$ as the function of $\tilde{U}_{2}$ with \ref{Uhlig2}:
+
+\begin{align}
+\tilde{U}_{4} = -U_{3}^{-1} \left(U_{1}\tilde{U}_{2} + U_{4} \right)
+\end{align}
+
+Substituting further in \ref{Uhlig4}
+
+\begin{align}
+U_{6}\tilde{U}_{2}+U_{8}\tilde{U}_{3}\tilde{U}_{2}-U_{8}U_{3}^{-1} (U_{1}\tilde{U}_{2}+U_{4})U_{12} - U_{9}U_{3}^{-1} (U_{1}\tilde{U}_{2}+U_{4})+U_{11} &= 0 \nonumber \\
+\Rightarrow \left(U_{6} + U_{8}\tilde{U}_{3} - U_{9}U_{3}^{-1}U_{1} \right)\tilde{U}_{2} - U_{8}U_{3}^{-1}U_{4}U_{12} - U_{9}U_{3}^{-1}U_{4} + U_{11} &= 0
+\end{align}
+
+Matrix $\tilde{U}_{2}$ is the only unknown, but it is not trivial, as $\tilde{U}_{2}$ is sandwiched. Nevertheless, one can use the Kronecker product $\otimes$ such that $vec \left(XYZ\right) = \left(Z^{T} \otimes X \right) vec(Y)$, applied to \ref{Uhlig4}:
+
+\begin{align}
+0 = I &\otimes \left(U_{6} + U_{8}\tilde{U}_{3} - U_{9}U_{3}^{-1}U_{1} \right) vec(\tilde{U}_{2}) - U_{12}^{T} \otimes \left(U_{8}U_{3}^{-1}U_{1}\right) vec(\tilde{U}_{2}) + \\
+& - vec\left(U_{8}U_{3}^{-1}U_{4}U_{12} - U_{9}U_{3}^{-1}U_{4} + U_{11} \right) \nonumber \\
+\Rightarrow vec&(\tilde{U}_{2}) = \left[ I \otimes \left(U_{6} + U_{8}\tilde{U}_{3} - U_{9}U_{3}^{-1}U_{1} \right) - U_{12}^{T} \otimes \left(U_{8}U_{3}^{-1}U_{1} \right)\right]^{-1} \cdot \\
+& \cdot vec\left(U_{8}U_{3}^{-1}U_{4}U_{12} - U_{9}U_{3}^{-1}U_{4} + U_{11} \right)
+\end{align}
+
+It has to be underlined that for the \citet{uhlig1998toolkit} procedure, one must choose \textit{jump} variables to maintain the full rank of $U_{3}$ matrix, namely augment the system with a \textit{dummy variable} and respective equations.
+
+Solution of \citet{uhlig1998toolkit} toolkit is a state space system: a transition equation supplemented with a measurement equation, equivalent to \citet{klein2000using} solution (\citet{bonaldi2010identification}).
 
 \section{Linear Time Iteration procedure} \label{LTI}
 
@@ -1091,7 +1091,7 @@ Finally, it has to be emphasised that the \citet{uhlig1998toolkit} and \citet{kl
 The model of interest is once again given by:
 
 \begin{align}
-AX_{t-1} + BX_{t} + CX_{t+1} + \mathbf{u}_{t} = 0
+AX_{t+1} + BX_{t} + CX_{t-1} + \mathbf{u}_{t} = 0
 \end{align}
 
 where $X_{t}$ is an $n \times 1$ vector containing endogenous and exogenous variables, $\mathbf{u}_{t}$ is an $n \times 1$ vector of mean-zero disturbances, and $A$, $B$ and $C$ are conformable matrices.
@@ -1105,43 +1105,43 @@ X_{t} = FX_{t-1} + G\mathbf{u}_{t}
 Inserting into the preceding equation:
 
 \begin{align}
-AX_{t-1} + BX_{t} + CFX_{t} + \mathbf{u}_{t} = 0
+CX_{t-1} + BX_{t} + AFX_{t} + \mathbf{u}_{t} = 0
 \end{align}
 
 Thus, the matrix $Q$ is trivially defined by:
 
 \begin{align}
-G = -\left( B + CF \right)^{-1}
+G = -\left( B + AF \right)^{-1}
 \end{align}
 
 Moreover, $F$ must be the solution to the quadratic matrix equation:
 
 \begin{align}
-A + BF + CF^{2} = 0
+C + BF + AF^{2} = 0
 \end{align}
 
 Undoubtedly, if $F$ is known, finding $Q$ is a trivial operation, therefore one should focus on finding $F$. Recall that it is sufficient to solve the deterministic part of the problem in order to retrieve it:
 
 \begin{align}
-AX_{t-1} + BX_{t} + CX_{t+1}  = 0
+CX_{t-1} + BX_{t} + AX_{t+1}  = 0
 \end{align}
 
 Suppose one has a candidate solvent: $F_{n}$. Then the solution of the succeeding problem for $X_{t}$:
 
 \begin{align}
-AX_{t-1} + BX_{t} + CF_{n}X_{t}  = 0
+CX_{t-1} + BX_{t} + AF_{n}X_{t}  = 0
 \end{align}
 
 is trivially given by:
 
 \begin{align}
-X_{t} = -\left( B + CF_{n} \right)^{-1} AX_{t-1}
+X_{t} = -\left( B + AF_{n} \right)^{-1} CX_{t-1}
 \end{align}
 
 Thus, the initial guess should be updated according to:
 
 \begin{align}
-F_{n+1} = -\left( B + CF_{n} \right)^{-1} A
+F_{n+1} = -\left( B + AF_{n} \right)^{-1} C
 \end{align}
 
 Furthermore, the author proves that the above-mentioned procedure converges to the DSGE solution under the \citet{blanchard1980solution} conditions and provides an enhanced technique to deal with common situations in which solvents contain eigenvalues that are zero.
@@ -1152,7 +1152,7 @@ In addition, {\color{red} ADD citation} provides the simple criterion, equivalen
 \left\{
 \begin{array}{cl}
 \lambda(F) &< 1 \nonumber \\
-\lambda \left( \left(AF + B \right)^{-1} A \right) &< 1 
+\lambda \left( \left(CF + B \right)^{-1} C \right) &< 1 
 \end{array}
 \right.
 \end{align}
@@ -1181,14 +1181,14 @@ With unobservable state variables, one can exploit the recursive nature of the m
 
 \begin{align}
 X_{t} &= F_{t} X_{t-1} + G_{t} \mathbf{u}_{t}, \quad t \geqslant 0 \\
-Z_{t} &= H_{t} X_{t} + \mathbf{v}_{t}
+Y_{t} &= H_{t} X_{t} + \mathbf{v}_{t}
 \end{align}
 
 where $\mathbf{u}_{t}$ and $\mathbf{v}_{t}$ are independent, zero-mean Gaussian white processes with covariances:
 
 \begin{align}
-\mathbb{E} \left(\mathbf{u}_{t} \mathbf{u}_{d}^{T} \right) &= R_{t} \iota _{td} \\
-\mathbb{E} \left(\mathbf{v}_{t} \mathbf{v}_{d}^{T} \right) &= Q_{t} \iota _{td}
+\mathbb{E} \left(\mathbf{u}_{t} \mathbf{u}_{d}^{T} \right) &= \Sigma_{t}^{\mathbf{u}} \iota _{td} \\
+\mathbb{E} \left(\mathbf{v}_{t} \mathbf{v}_{d}^{T} \right) &= \Sigma_{t}^{\mathbf{v}} \iota _{td}
 \end{align}
 
 
@@ -1198,23 +1198,23 @@ Moreover, the initial state $X_{0}$ is assumed to be Gaussian random variable, i
 X_{0} \sim \mathcal{N} \left(\bar{X}_{0}, P_{0} \right)
 \end{align}
 
-In addition, let $\tilde{Z}_{t} = (Z_{0}, \ldots, Z_{t})$. The goal is to compute recursively the following optimal estimator ox $X_{t}$:
+In addition, let $\tilde{Y}_{t} = (Y_{0}, \ldots, Y_{t})$. The goal is to compute recursively the following optimal estimator ox $X_{t}$:
 
 \begin{align}
-\hat{X}_{t}^{+} \equiv \hat{X}_{t | t} = \mathbb{E} (X_{t} | \tilde{Z}_{t})
+\hat{X}_{t}^{+} \equiv \hat{X}_{t | t} = \mathbb{E} (X_{t} | \tilde{Y}_{t})
 \end{align}
 
 Define as well the \textit{one-step predictor} of $X_{t}$:
 
 \begin{align}
-\hat{X}_{t}^{-} \equiv \hat{X}_{t | t-1} = \mathbb{E} (X_{t} | \tilde{Z}_{t-1})
+\hat{X}_{t}^{-} \equiv \hat{X}_{t | t-1} = \mathbb{E} (X_{t} | \tilde{Y}_{t-1})
 \end{align}
 
 and the respective covariance matrices:
 
 \begin{align}
-P_{t}^{+} \equiv P_{t | t} &= \mathbb{E} \left[ \left(X_{t} -\hat{X}_{t}^{+} \right) \left(X_{t} - \hat{X}_{t}^{+} \right)^{T} |  \tilde{Z}_{t}\right] \\
-P_{t}^{-} \equiv P_{t | t-1} &= \mathbb{E} \left[ \left(X_{t} -\hat{X}_{t}^{+} \right) \left(X_{t} - \hat{X}_{t}^{+} \right)^{T} |  \tilde{Z}_{t-1} \right]
+P_{t}^{+} \equiv P_{t | t} &= \mathbb{E} \left[ \left(X_{t} -\hat{X}_{t}^{+} \right) \left(X_{t} - \hat{X}_{t}^{+} \right)^{T} |  \tilde{Y}_{t}\right] \\
+P_{t}^{-} \equiv P_{t | t-1} &= \mathbb{E} \left[ \left(X_{t} -\hat{X}_{t}^{+} \right) \left(X_{t} - \hat{X}_{t}^{+} \right)^{T} |  \tilde{Y}_{t-1} \right]
 \end{align}
 
 Finally denote:
@@ -1224,16 +1224,16 @@ P_{0}^{-} &= P_{0} \\
 \hat{X}_{t}^{-} &= \bar{X}_{0}
 \end{align}
 
-From the normality, it follows that the conditional random variable $(X_{t} | \tilde{Z}_{d})$ for any $t, d$. In particular:
+From the normality, it follows that the conditional random variable $(X_{t} | \tilde{Y}_{d})$ for any $t, d$. In particular:
 
 \begin{align}
-(X_{t} | \tilde{Z}_{t}) &\sim   \mathcal{N} \left(\hat{X}_{t}^{+}, P_{t}^{+} \right) \\
-(X_{t} | \tilde{Z}_{t-1}) &\sim  \mathcal{N} \left(\hat{X}_{t}^{-}, P_{t}^{-} \right)
+(X_{t} | \tilde{Y}_{t}) &\sim   \mathcal{N} \left(\hat{X}_{t}^{+}, P_{t}^{+} \right) \\
+(X_{t} | \tilde{Y}_{t-1}) &\sim  \mathcal{N} \left(\hat{X}_{t}^{-}, P_{t}^{-} \right)
 \end{align}
 
 In order to derive the Kalman filter, suppose, at time $t$, that $\left(\hat{X}_{t}^{-}, P_{t}^{-} \right)$ is given. Then $\left(\hat{X}_{t}^{+}, P_{t}^{+} \right)$ and $\left(\hat{X}_{t+1}^{-}, P_{t+1}^{-} \right)$ shall be computes in two steps. \\
 
-\underline{Measurement update step:} Since $Z_{t} = H_{t} X_{t} + \mathbf{v}_{t}$, then the conditional vector $\left( \binom{X_{t}}{Z_{t}}  | \tilde{Z}_{t-1} \right)$ is Gaussian, with mean:
+\underline{Measurement update step:} Since $Y_{t} = H_{t} X_{t} + \mathbf{v}_{t}$, then the conditional vector $\left( \binom{X_{t}}{Y_{t}}  | \tilde{Y}_{t-1} \right)$ is Gaussian, with mean:
 
 \begin{align}
 \left[\begin{array}{c}
@@ -1254,26 +1254,26 @@ H_{t}P_{t}^{-} & M_{t}
 where:
 
 \begin{align}
-M_{t} = H_{t} P_{t}^{-} H_{t}^{T} + R_{t}
+M_{t} = H_{t} P_{t}^{-} H_{t}^{T} + \Sigma_{t}^{\mathbf{u}}
 \end{align}
 
-To compute $\left(X_{t} |  \tilde{Z}_{t} \right)$, it is sufficient to apply the formula for conditional expectation of Gaussian random variable, with everything pre-conditioned on $\tilde{Z}_{t-1}$. In other words, it follows that $\left(X_{t} |  \tilde{Z}_{t} \right)$ is Gaussian with mean:
+To compute $\left(X_{t} |  \tilde{Y}_{t} \right)$, it is sufficient to apply the formula for conditional expectation of Gaussian random variable, with everything pre-conditioned on $\tilde{Y}_{t-1}$. In other words, it follows that $\left(X_{t} |  \tilde{Y}_{t} \right)$ is Gaussian with mean:
 
 \begin{align}
-\hat{X}_{t}^{+} = \mathbb{E} (X_{t} | \tilde{Z}_{t} ) = \hat{X}_{t}^{-} + P_{t}^{-} H_{t}^{T} \left(M_{t} \right)^{-1} \left(Z_{t} - H_{t} \hat{X}_{t}^{-} \right)
+\hat{X}_{t}^{+} = \mathbb{E} (X_{t} | \tilde{Y}_{t} ) = \hat{X}_{t}^{-} + P_{t}^{-} H_{t}^{T} \left(M_{t} \right)^{-1} \left(Y_{t} - H_{t} \hat{X}_{t}^{-} \right)
 \end{align}
 
 and covariance:
 
 \begin{align}
-P_{t}^{+} = \mathbb{C} (X_{t} | \tilde{Z}_{t} ) = P_{t}^{-} - P_{t}^{-} H_{t}^{T}\left(M_{t} \right)^{-1} H_{t} P_{t}^{-}
+P_{t}^{+} = \mathbb{C} (X_{t} | \tilde{Y}_{t} ) = P_{t}^{-} - P_{t}^{-} H_{t}^{T}\left(M_{t} \right)^{-1} H_{t} P_{t}^{-}
 \end{align}
 
-\underline{Time update step:} Recall that $X_{t} = F_{t} X_{t-1} + G_{t} \mathbf{u}_{t}$ and that $X_{t}$ and $ \mathbf{u}_{t}$ are independent given $\tilde{Z}_{t}$. Therefore:
+\underline{Time update step:} Recall that $X_{t} = F_{t} X_{t-1} + G_{t} \mathbf{u}_{t}$ and that $X_{t}$ and $ \mathbf{u}_{t}$ are independent given $\tilde{Y}_{t}$. Therefore:
 
 \begin{align}
-\hat{X}_{t+1}^{-} &= \mathbb{E} (X_{t+1} | \tilde{Z}_{t} ) = F_{t} \hat{X}_{t}^{+} \\
-P_{t+1}^{-} &= \mathbb{C} (X_{t+1} | \tilde{Z}_{t} ) = F_{t} P_{t}^{+} F_{t}^{T} + G_{t}Q_{t}G_{t}^{T}
+\hat{X}_{t+1}^{-} &= \mathbb{E} (X_{t+1} | \tilde{Y}_{t} ) = F_{t} \hat{X}_{t}^{+} \\
+P_{t+1}^{-} &= \mathbb{C} (X_{t+1} | \tilde{Y}_{t} ) = F_{t} P_{t}^{+} F_{t}^{T} + G_{t}\Sigma_{t}^{\mathbf{v}}G_{t}^{T}
 \end{align} 
 
 \section{Maximum likelihood}
@@ -1288,21 +1288,21 @@ Nevertheless, as pointed out by \citet{fernandez2010econometrics}, maximizing th
 
 The computational ramification of learning algorithm becomes the decisive restricting factor when one envisions large scale machine learning problems. One of the most esteemed optimization algorithms is called Stochastic Gradient Descent (SGD, \citet{robbins1951stochastic}).
 
-Assume that for each example $z = (x, y)$, consisting of an arbitrary input $x$ and scalar output $y$, one can construct the \textit{loss function} $l(\hat{y}, y)$ that evaluates the cost of predicting $\hat{y}$ when the actual value is $y$. The aim is to identify a function $f \in \mathcal{F}$ that minimizes the loss $L(z, w) = l(f_{w}, y)$ averaged on the examples, where $f_{w}$ is the permissible function parametrized by a weight vector $w$. In fact, one desires to average over the unknown distribution $dP(z)$:
+Assume that for each example $z = (x, y)$, consisting of an arbitrary input $x$ and scalar output $y$, one can construct the \textit{loss function} $l(\hat{y}, y)$ that evaluates the cost of predicting $\hat{y}$ when the actual value is $y$. The aim is to identify a function $f \in \mathcal{F}$ that minimizes the loss $L(z, w) = l(f_{w}, y)$ averaged on the examples, where $f_{w}$ is the permissible function parametrized by a weight vector $w$. In fact, one desires to average over the unknown distribution $d \mathbb{P}(z)$:
 
 \begin{align}
-\mathbf{E} (f) = \int l(f(x), y) dP(z)
+\mathbb{E} (f) = \int l(f(x), y) d \mathbb{P}(z)
 \end{align}
 
 when only the average on the sample $z_{1}, \ldots, z_{n}$ is available:
 
 \begin{align}
-\mathbf{E}_{n} = \frac{1}{n} \sum\limits_{i=1}^{n} l(f(x_{i}), y_{i})
+\mathbb{E}_{n} = \frac{1}{n} \sum\limits_{i=1}^{n} l(f(x_{i}), y_{i})
 \end{align}
 
-The \textit{empirical risk} $\mathbf{E}_{n}$ measures the training set performance. The \textit{expected risk} $\mathbf{E} (f)$ regulates the generalization performance, defined as the expected performance on future examples. The statistical learning theory (\citet{vapnik2015uniform}) countenances minimizing the empirical risk instead of the expected one when the selected family F is sufficiently restrictive.
+The \textit{empirical risk} $\mathbb{E}_{n}$ measures the training set performance. The \textit{expected risk} $\mathbb{E} (f)$ regulates the generalization performance, defined as the expected performance on future examples. The statistical learning theory (\citet{vapnik2015uniform}) countenances minimizing the empirical risk instead of the expected one when the selected family $\mathcal{F}$ is sufficiently restrictive.
 
-It has repeatedly been suggested (\citet{rumelhart1985learning}) to minimize the empirical risk $\mathbf{E} (f_{w})$ using Gradient Descent (GD). Each iteration updates the weights $w$ on the basis of the gradient of $\mathbf{E}_{n} (f_{w})$:
+It has repeatedly been suggested (\citet{rumelhart1985learning}) to minimize the empirical risk $\mathbb{E} (f_{w})$ using Gradient Descent (GD). Each iteration updates the weights $w$ on the basis of the gradient of $\mathbb{E}_{n} (f_{w})$:
 
 \begin{align}
 w_{t+1} = w_{t} - \gamma \frac{1}{n} \sum\limits_{i=1}^{n} \nabla_{w} L(z_{i}, w_{t})
@@ -1310,7 +1310,7 @@ w_{t+1} = w_{t} - \gamma \frac{1}{n} \sum\limits_{i=1}^{n} \nabla_{w} L(z_{i}, w
 
 where $\gamma$ is a competently chosen learning rate. Under sufficient regularity assumptions, when the initial estimate $w_{0}$ is close enough to the optimum and when the learning rate $\gamma$ is amply modest, this algorithm accomplishes linear convergence (\citet{dennis1996numerical}).
 
-The Stochastic Gradient Descent (SGD) algorithm is a drastic simplification. Instead of computing the gradient of $\mathbf{E}_{n} (f_{w})$ exactly, each iteration estimates it on the basis of a single randomly picked example $z_{i}$:
+The Stochastic Gradient Descent (SGD) algorithm is a drastic simplification. Instead of computing the gradient of $\mathbb{E}_{n} (f_{w})$ exactly, each iteration estimates it on the basis of a single randomly picked example $z_{i}$:
 
 \begin{align}
 w_{t+1} = w_{t} - \gamma \nabla_{w} L(z_{i}, w_{t})
